@@ -34,14 +34,21 @@ export default async function VehiclePage({ params }: { params: { id: string } }
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Galerie */}
           <div>
-            <div className="aspect-video bg-dark-100 rounded-xl flex items-center justify-center mb-4">
-              <span className="text-gray-600 text-2xl">Image principale</span>
+            <div className="aspect-video bg-dark-100 rounded-xl flex items-center justify-center mb-4 overflow-hidden shadow-2xl border border-gray-800">
+              {images[0] ? (
+                <img src={images[0]} alt={vehicle.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center gap-4">
+                  <span className="text-6xl grayscale opacity-20">🚗</span>
+                  <span className="text-gray-600 text-sm font-medium uppercase tracking-widest">Aucune image disponible</span>
+                </div>
+              )}
             </div>
             {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {images.slice(1, 5).map((img: string, i: number) => (
-                  <div key={i} className="aspect-video bg-dark-200 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-700 text-xs">Img {i + 2}</span>
+              <div className="grid grid-cols-4 gap-3">
+                {images.slice(1, 9).map((img: string, i: number) => (
+                  <div key={i} className="aspect-video bg-dark-200 rounded-lg overflow-hidden border border-gray-800 hover:border-primary-500 transition cursor-pointer shadow-lg group">
+                    <img src={img} alt={`${vehicle.name} ${i + 2}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 ))}
               </div>

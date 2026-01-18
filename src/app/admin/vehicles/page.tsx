@@ -127,14 +127,20 @@ export default function AdminVehiclesPage() {
 
   const handleEdit = (v: Vehicle) => {
     setEditingVehicle(v)
-    const images = JSON.parse(v.images || '[]')
+    let parsedImages = []
+    try {
+      parsedImages = typeof v.images === 'string' ? JSON.parse(v.images || '[]') : (Array.isArray(v.images) ? v.images : [])
+    } catch (e) {
+      console.error('Error parsing images:', e)
+      parsedImages = []
+    }
     setForm({
       name: v.name,
       description: v.description || '',
       price: v.price.toString(),
       brandId: v.brand.id,
       category: v.category || '',
-      images: images,
+      images: parsedImages,
       power: v.power?.toString() || '',
       trunk: v.trunk?.toString() || '',
       vmax: v.vmax?.toString() || '',
