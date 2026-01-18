@@ -17,7 +17,6 @@ interface DealershipDetail {
     id: string
     price: number
     mileage: number | null
-    condition: string | null
     description: string | null
     vehicle: {
       id: string
@@ -127,11 +126,6 @@ export default function DealershipDetailPage({ params }: { params: { id: string 
                       {listing.mileage && (
                         <p className="text-gray-500 text-sm mb-2">
                           {listing.mileage.toLocaleString()} km
-                        </p>
-                      )}
-                      {listing.condition && (
-                        <p className="text-gray-500 text-sm mb-2">
-                          État : {listing.condition}
                         </p>
                       )}
                       <div className="flex items-center justify-between mt-4">

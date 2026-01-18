@@ -29,7 +29,7 @@ export async function GET(
 
     // Récupérer les annonces
     const listingsResult = await query(
-      `SELECT dl.id, dl.price, dl.mileage, dl.condition, dl.description, dl."isAvailable",
+      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl."isAvailable",
               v.id as vehicle_id, v.name, v.description as vehicle_description,
               v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images,
               b.id as brand_id, b.name as brand_name, b.logo as brand_logo
@@ -45,7 +45,6 @@ export async function GET(
       id: row.id,
       price: row.price,
       mileage: row.mileage,
-      condition: row.condition,
       description: row.description,
       isAvailable: row.isAvailable,
       vehicle: {

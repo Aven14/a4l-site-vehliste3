@@ -17,7 +17,7 @@ export async function PUT(
   }
 
   try {
-    const { price, mileage, condition, description, images, isAvailable } =
+    const { price, mileage, description, images, isAvailable } =
       await req.json()
 
     // Get user dealership
@@ -55,7 +55,6 @@ export async function PUT(
       data: {
         price: price !== undefined ? price : undefined,
         mileage: mileage !== undefined ? mileage : undefined,
-        condition: condition !== undefined ? condition : undefined,
         description: description !== undefined ? description : undefined,
         images: images ? JSON.stringify(images) : undefined,
         isAvailable: isAvailable !== undefined ? isAvailable : undefined,
