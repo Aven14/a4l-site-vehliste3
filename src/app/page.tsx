@@ -44,23 +44,16 @@ export default async function HomePage() {
             Liste non-officielle des véhicules du serveur Arma For Life.
             Retrouvez tous les véhicules disponibles avec leurs caractéristiques.
           </p>
-<<<<<<< HEAD
-          <div className="flex gap-4 justify-center">
-=======
           <div className="flex flex-wrap gap-4 justify-center">
->>>>>>> 39e2d28 (Update)
             <Link href="/vehicles" className="btn-primary">
               Voir les véhicules
             </Link>
             <Link href="/brands" className="btn-secondary">
               Parcourir les marques
             </Link>
-<<<<<<< HEAD
-=======
             <Link href="/dealerships" className="btn-secondary">
               Concessionnaires
             </Link>
->>>>>>> 39e2d28 (Update)
           </div>
         </div>
       </section>

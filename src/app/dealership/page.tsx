@@ -1,13 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+
+interface Brand {
+  id: string
+  name: string
+  logo: string | null
+}
 
 interface Vehicle {
   id: string
   name: string
-  brand: { name: string }
+  brand: { id: string; name: string }
   price: number
   power: number | null
 }
@@ -16,7 +22,8 @@ interface Listing {
   id: string
   price: number
   mileage: number | null
-  condition: string | null
+  images: string | null
+  description: string | null
   vehicle: Vehicle
 }
 
@@ -25,16 +32,19 @@ export default function DealershipDashboard() {
   const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [imageUrls, setImageUrls] = useState<string[]>([''])
 
   const [formData, setFormData] = useState({
     vehicleId: '',
     price: '',
     mileage: '',
-    condition: 'excellent',
     description: '',
   })
 
@@ -62,8 +72,51 @@ export default function DealershipDashboard() {
             setVehicles(data)
           }
         })
+
+      // Récupérer toutes les marques
+      fetch('/api/brands')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setBrands(data)
+          }
+        })
     }
   }, [session])
+
+  // Filtrer les véhicules par marque et recherche
+  const filteredVehicles = useMemo(() => {
+    const vehicleIds = new Set(listings.map(l => l.vehicle.id))
+    let filtered = vehicles.filter(v => !vehicleIds.has(v.id))
+
+    if (selectedBrand) {
+      filtered = filtered.filter(v => v.brand.id === selectedBrand)
+    }
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(v => 
+        v.name.toLowerCase().includes(query) ||
+        v.brand.name.toLowerCase().includes(query)
+      )
+    }
+
+    return filtered
+  }, [vehicles, listings, selectedBrand, searchQuery])
+
+  const handleAddImage = () => {
+    setImageUrls([...imageUrls, ''])
+  }
+
+  const handleRemoveImage = (index: number) => {
+    setImageUrls(imageUrls.filter((_, i) => i !== index))
+  }
+
+  const handleImageChange = (index: number, value: string) => {
+    const newImageUrls = [...imageUrls]
+    newImageUrls[index] = value
+    setImageUrls(newImageUrls)
+  }
 
   const handleAddListing = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,6 +128,9 @@ export default function DealershipDashboard() {
       return
     }
 
+    // Filtrer les URLs d'images vides
+    const validImages = imageUrls.filter(url => url.trim() !== '')
+
     try {
       const res = await fetch('/api/dealerships/my-dealership/listings', {
         method: 'POST',
@@ -83,8 +139,8 @@ export default function DealershipDashboard() {
           vehicleId: formData.vehicleId,
           price: parseInt(formData.price),
           mileage: formData.mileage ? parseInt(formData.mileage) : null,
-          condition: formData.condition,
           description: formData.description || null,
+          images: validImages.length > 0 ? validImages : null,
         }),
       })
 
@@ -97,9 +153,11 @@ export default function DealershipDashboard() {
           vehicleId: '',
           price: '',
           mileage: '',
-          condition: 'excellent',
           description: '',
         })
+        setImageUrls([''])
+        setSelectedBrand('')
+        setSearchQuery('')
         setShowAddForm(false)
       } else {
         setError(data.error || 'Erreur lors de l\'ajout')
@@ -132,16 +190,13 @@ export default function DealershipDashboard() {
     return <div className="min-h-screen flex items-center justify-center text-gray-500">Chargement...</div>
   }
 
-  const vehicleIds = new Set(listings.map(l => l.vehicle.id))
-  const availableVehicles = vehicles.filter(v => !vehicleIds.has(v.id))
-
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="font-display text-4xl font-bold text-white mb-2">
           Mon <span className="text-primary-400">Concessionnaire</span>
         </h1>
-        <p className="text-gray-500 mb-12">Gérez vos annonces de véhicules d'occasion</p>
+        <p className="text-gray-500 mb-12">Gérez vos annonces de véhicules</p>
 
         {message && (
           <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-4 text-primary-400 mb-6">
@@ -168,22 +223,55 @@ export default function DealershipDashboard() {
 
           {showAddForm && (
             <form onSubmit={handleAddListing} className="space-y-4">
+              {/* Filtres de sélection */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Filtrer par marque</label>
+                  <select
+                    value={selectedBrand}
+                    onChange={(e) => setSelectedBrand(e.target.value)}
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                  >
+                    <option value="">Toutes les marques</option>
+                    {brands.map(b => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Rechercher un véhicule</label>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="🔍 Nom du véhicule..."
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Sélection du véhicule */}
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Véhicule *</label>
+                <label className="block text-gray-400 text-sm mb-2">Véhicule * ({filteredVehicles.length} disponible{filteredVehicles.length > 1 ? 's' : ''})</label>
                 <select
                   value={formData.vehicleId}
                   onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
                   className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                  required
                 >
                   <option value="">Sélectionner un véhicule</option>
-                  {availableVehicles.map(v => (
+                  {filteredVehicles.map(v => (
                     <option key={v.id} value={v.id}>
-                      {v.brand.name} {v.name}
+                      {v.brand.name} {v.name} - {v.price.toLocaleString()}€
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Prix et kilométrage */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-gray-400 text-sm mb-2">Prix (€) *</label>
@@ -193,6 +281,7 @@ export default function DealershipDashboard() {
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                     placeholder="0"
+                    required
                   />
                 </div>
 
@@ -208,20 +297,41 @@ export default function DealershipDashboard() {
                 </div>
               </div>
 
+              {/* Images */}
               <div>
-                <label className="block text-gray-400 text-sm mb-2">État du véhicule</label>
-                <select
-                  value={formData.condition}
-                  onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                >
-                  <option value="excellent">Excellent</option>
-                  <option value="bon">Bon</option>
-                  <option value="acceptable">Acceptable</option>
-                  <option value="mauvais">Mauvais</option>
-                </select>
+                <label className="block text-gray-400 text-sm mb-2">Images du véhicule</label>
+                <div className="space-y-2">
+                  {imageUrls.map((url, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="url"
+                        value={url}
+                        onChange={(e) => handleImageChange(index, e.target.value)}
+                        placeholder="https://exemple.com/image.jpg"
+                        className="flex-1 bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                      />
+                      {imageUrls.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/20 transition"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddImage}
+                    className="text-primary-400 hover:text-primary-300 text-sm transition"
+                  >
+                    + Ajouter une image
+                  </button>
+                </div>
               </div>
 
+              {/* Description */}
               <div>
                 <label className="block text-gray-400 text-sm mb-2">Description</label>
                 <textarea
@@ -229,7 +339,7 @@ export default function DealershipDashboard() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                   rows={3}
-                  placeholder="Décrivez l'état du véhicule..."
+                  placeholder="Décrivez le véhicule..."
                 />
               </div>
 
@@ -252,33 +362,47 @@ export default function DealershipDashboard() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {listings.map(listing => (
-                <div key={listing.id} className="card overflow-hidden">
-                  <div className="p-4">
-                    <p className="text-primary-400 text-sm mb-1">{listing.vehicle.brand.name}</p>
-                    <h3 className="font-display text-lg font-bold text-white mb-2">
-                      {listing.vehicle.name}
-                    </h3>
+              {listings.map(listing => {
+                const images = listing.images ? JSON.parse(listing.images) : []
+                return (
+                  <div key={listing.id} className="card overflow-hidden">
+                    {images.length > 0 && (
+                      <div className="aspect-video bg-dark-300 relative overflow-hidden">
+                        <img 
+                          src={images[0]} 
+                          alt={listing.vehicle.name} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <p className="text-primary-400 text-sm mb-1">{listing.vehicle.brand.name}</p>
+                      <h3 className="font-display text-lg font-bold text-white mb-2">
+                        {listing.vehicle.name}
+                      </h3>
 
-                    <div className="space-y-1 text-sm text-gray-400 mb-4">
-                      {listing.mileage && <p>Kilométrage: {listing.mileage.toLocaleString()} km</p>}
-                      {listing.condition && <p>État: {listing.condition}</p>}
-                    </div>
+                      <div className="space-y-1 text-sm text-gray-400 mb-4">
+                        {listing.mileage && <p>Kilométrage: {listing.mileage.toLocaleString()} km</p>}
+                        {listing.description && (
+                          <p className="text-xs line-clamp-2">{listing.description}</p>
+                        )}
+                      </div>
 
-                    <div className="border-t border-gray-700 pt-4 flex items-center justify-between">
-                      <span className="text-xl font-bold text-primary-400">
-                        {listing.price.toLocaleString()} €
-                      </span>
-                      <button
-                        onClick={() => handleDeleteListing(listing.id)}
-                        className="text-red-400 hover:text-red-300 text-sm transition"
-                      >
-                        Supprimer
-                      </button>
+                      <div className="border-t border-gray-700 pt-4 flex items-center justify-between">
+                        <span className="text-xl font-bold text-primary-400">
+                          {listing.price.toLocaleString()} €
+                        </span>
+                        <button
+                          onClick={() => handleDeleteListing(listing.id)}
+                          className="text-red-400 hover:text-red-300 text-sm transition"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

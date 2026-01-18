@@ -37,12 +37,9 @@ export function Navbar() {
             <Link href="/vehicles" className="text-gray-300 hover:text-primary-400 transition font-medium">
               Véhicules
             </Link>
-<<<<<<< HEAD
-=======
             <Link href="/dealerships" className="text-gray-300 hover:text-primary-400 transition font-medium hidden sm:block">
               Concessionnaires
             </Link>
->>>>>>> 39e2d28 (Update)
 
             {session ? (
               <div className="flex items-center gap-3">

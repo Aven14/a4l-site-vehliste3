@@ -117,7 +117,6 @@ model DealershipListing {
   price        Int      // Prix de vente par le concessionnaire (peut être différent du prix d'origine)
   images       String?  // Images supplémentaires du concessionnaire (JSON array)
   mileage      Int?     // Kilométrage pour l'occasion
-  condition    String?  // État du véhicule (excellent, bon, acceptable, mauvais)
   description  String?  // Description additionnelle
   isAvailable  Boolean  @default(true)
   createdAt    DateTime @default(now())

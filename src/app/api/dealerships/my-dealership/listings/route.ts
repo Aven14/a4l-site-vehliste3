@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
 
     // Récupérer les annonces
     const listingsResult = await query(
-      `SELECT dl.id, dl.price, dl.mileage, dl.condition, dl.description, dl."isAvailable",
+      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl.images, dl."isAvailable",
               v.id as vehicle_id, v.name, v.description as vehicle_description,
-              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images,
+              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images as vehicle_images,
               b.id as brand_id, b.name as brand_name, b.logo as brand_logo
        FROM "DealershipListing" dl
        JOIN "Vehicle" v ON dl."vehicleId" = v.id
@@ -49,8 +49,8 @@ export async function GET(req: NextRequest) {
       id: row.id,
       price: row.price,
       mileage: row.mileage,
-      condition: row.condition,
       description: row.description,
+      images: row.images,
       isAvailable: row.isAvailable,
       vehicle: {
         id: row.vehicle_id,
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
         trunk: row.trunk,
         vmax: row.vmax,
         seats: row.seats,
-        images: row.images,
+        images: row.vehicle_images,
         brand: {
           id: row.brand_id,
           name: row.brand_name,
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { vehicleId, price, mileage, condition, description, images } =
+    const { vehicleId, price, mileage, description, images } =
       await req.json()
 
     if (!vehicleId || price === undefined) {
@@ -143,7 +143,6 @@ export async function POST(req: NextRequest) {
         vehicleId,
         price,
         mileage,
-        condition,
         description,
         images: images ? JSON.stringify(images) : null,
       },
