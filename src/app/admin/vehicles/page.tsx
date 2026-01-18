@@ -121,7 +121,7 @@ export default function AdminVehiclesPage() {
 
     setShowForm(false)
     setEditingVehicle(null)
-    setForm({ name: '', description: '', price: '', brandId: '', category: '', images: '', power: '', trunk: '', vmax: '', seats: '' })
+    setForm({ name: '', description: '', price: '', brandId: '', category: '', images: [], power: '', trunk: '', vmax: '', seats: '' })
     fetchData()
   }
 
