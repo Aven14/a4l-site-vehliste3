@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import ImageUpload from '@/components/ImageUpload'
 
 interface Brand { id: string; name: string }
 interface Vehicle {
@@ -30,7 +31,8 @@ export default function AdminVehiclesPage() {
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
   const [form, setForm] = useState({
-    name: '', description: '', price: '', brandId: '', category: '', images: '',
+    name: '', description: '', price: '', brandId: '', category: '', 
+    images: [] as string[],
     power: '', trunk: '', vmax: '', seats: ''
   })
 
@@ -100,8 +102,6 @@ export default function AdminVehiclesPage() {
     const url = editingVehicle ? `/api/vehicles/${editingVehicle.id}` : '/api/vehicles'
     const method = editingVehicle ? 'PUT' : 'POST'
 
-    const images = form.images.split('\n').filter(Boolean)
-
     await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
@@ -115,7 +115,7 @@ export default function AdminVehiclesPage() {
         seats: form.seats ? parseInt(form.seats) : null,
         brandId: form.brandId,
         category: form.category,
-        images,
+        images: form.images,
       }),
     })
 
@@ -134,7 +134,7 @@ export default function AdminVehiclesPage() {
       price: v.price.toString(),
       brandId: v.brand.id,
       category: v.category || '',
-      images: images.join('\n'),
+      images: images,
       power: v.power?.toString() || '',
       trunk: v.trunk?.toString() || '',
       vmax: v.vmax?.toString() || '',
@@ -165,7 +165,7 @@ export default function AdminVehiclesPage() {
   }
 
   const resetForm = () => {
-    setForm({ name: '', description: '', price: '', brandId: brands[0]?.id || '', category: '', images: '', power: '', trunk: '', vmax: '', seats: '' })
+    setForm({ name: '', description: '', price: '', brandId: brands[0]?.id || '', category: '', images: [], power: '', trunk: '', vmax: '', seats: '' })
     setEditingVehicle(null)
     setShowForm(true)
   }
@@ -325,12 +325,10 @@ export default function AdminVehiclesPage() {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-gray-400 text-sm mb-2">URLs des images (une par ligne)</label>
-                <textarea
-                  value={form.images}
-                  onChange={(e) => setForm({ ...form, images: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none resize-none"
-                  rows={3}
+                <label className="block text-gray-400 text-sm mb-2">Images du véhicule (Drag & Drop pour réordonner)</label>
+                <ImageUpload 
+                  images={form.images} 
+                  onChange={(images) => setForm({ ...form, images })} 
                 />
               </div>
               <div className="md:col-span-2 flex gap-3">

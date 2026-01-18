@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import ImageUpload from '@/components/ImageUpload'
 
 interface Brand {
   id: string
@@ -39,7 +40,7 @@ export default function DealershipDashboard() {
   const [error, setError] = useState('')
   const [selectedBrand, setSelectedBrand] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [imageUrls, setImageUrls] = useState<string[]>([''])
+  const [imageUrls, setImageUrls] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     vehicleId: '',
@@ -104,20 +105,6 @@ export default function DealershipDashboard() {
     return filtered
   }, [vehicles, listings, selectedBrand, searchQuery])
 
-  const handleAddImage = () => {
-    setImageUrls([...imageUrls, ''])
-  }
-
-  const handleRemoveImage = (index: number) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index))
-  }
-
-  const handleImageChange = (index: number, value: string) => {
-    const newImageUrls = [...imageUrls]
-    newImageUrls[index] = value
-    setImageUrls(newImageUrls)
-  }
-
   const handleAddListing = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -128,9 +115,6 @@ export default function DealershipDashboard() {
       return
     }
 
-    // Filtrer les URLs d'images vides
-    const validImages = imageUrls.filter(url => url.trim() !== '')
-
     try {
       const res = await fetch('/api/dealerships/my-dealership/listings', {
         method: 'POST',
@@ -140,7 +124,7 @@ export default function DealershipDashboard() {
           price: parseInt(formData.price),
           mileage: formData.mileage ? parseInt(formData.mileage) : null,
           description: formData.description || null,
-          images: validImages.length > 0 ? validImages : null,
+          images: imageUrls.length > 0 ? imageUrls : null,
         }),
       })
 
@@ -155,7 +139,7 @@ export default function DealershipDashboard() {
           mileage: '',
           description: '',
         })
-        setImageUrls([''])
+        setImageUrls([])
         setSelectedBrand('')
         setSearchQuery('')
         setShowAddForm(false)
@@ -299,36 +283,11 @@ export default function DealershipDashboard() {
 
               {/* Images */}
               <div>
-                <label className="block text-gray-400 text-sm mb-2">Images du véhicule</label>
-                <div className="space-y-2">
-                  {imageUrls.map((url, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        type="url"
-                        value={url}
-                        onChange={(e) => handleImageChange(index, e.target.value)}
-                        placeholder="https://exemple.com/image.jpg"
-                        className="flex-1 bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                      />
-                      {imageUrls.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/20 transition"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={handleAddImage}
-                    className="text-primary-400 hover:text-primary-300 text-sm transition"
-                  >
-                    + Ajouter une image
-                  </button>
-                </div>
+                <label className="block text-gray-400 text-sm mb-2">Images du véhicule (Drag & Drop pour réordonner)</label>
+                <ImageUpload 
+                  images={imageUrls} 
+                  onChange={setImageUrls} 
+                />
               </div>
 
               {/* Description */}
