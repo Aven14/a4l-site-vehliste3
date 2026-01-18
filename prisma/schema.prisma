@@ -1,0 +1,127 @@
+// Schéma Prisma pour Arma For Life - Concession Automobile
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Rôles personnalisés
+model Role {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  canAccessAdmin   Boolean  @default(false)
+  canEditBrands    Boolean  @default(false)
+  canEditVehicles  Boolean  @default(false)
+  canDeleteBrands  Boolean  @default(false)
+  canDeleteVehicles Boolean @default(false)
+  canImport        Boolean  @default(false)
+  canManageUsers   Boolean  @default(false)
+  canManageRoles   Boolean  @default(false)
+  isSystem         Boolean  @default(false) // true pour superadmin/admin/user
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  users            User[]
+}
+
+// Utilisateurs du site
+model User {
+  id                String    @id @default(cuid())
+  username          String?   @unique
+  email             String?   @unique
+  password          String?
+  image             String?
+  roleId            String?
+  role              Role?     @relation(fields: [roleId], references: [id])
+  isVerified        Boolean   @default(false)
+  verificationCode  String?
+  codeExpires       DateTime?
+  verificationAttempts Int    @default(0)
+  // Changement de mot de passe
+  passwordChangeToken String?
+  passwordChangeExpires DateTime?
+  passwordChangePending String? // Hashed new password
+  // Changement d'e-mail
+  emailChangeToken  String?
+  emailChangeExpires DateTime?
+  emailChangePending String? // Nouvel e-mail en attente
+  // Couleur du thème personnalisée
+  themeColor        String?  // Code couleur hex (ex: #a855f7 pour violet)
+  // Concessionnaire associé
+  dealership        Dealership?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+// Marques de véhicules
+model Brand {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  logo      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  vehicles  Vehicle[]
+}
+
+// Véhicules
+model Vehicle {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  power       Int?
+  trunk       Int?
+  vmax        Int?
+  seats       Int?
+  images      String
+  brandId     String
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  category    String?
+  listings    DealershipListing[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Paramètres du site
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Concessionnaires
+model Dealership {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  logo        String?
+  userId      String   @unique // Un utilisateur = un concessionnaire
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listings    DealershipListing[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Véhicules en vente par les concessionnaires
+model DealershipListing {
+  id           String   @id @default(cuid())
+  dealershipId String
+  dealership   Dealership @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  vehicleId    String
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  price        Int      // Prix de vente par le concessionnaire (peut être différent du prix d'origine)
+  images       String?  // Images supplémentaires du concessionnaire (JSON array)
+  mileage      Int?     // Kilométrage pour l'occasion
+  condition    String?  // État du véhicule (excellent, bon, acceptable, mauvais)
+  description  String?  // Description additionnelle
+  isAvailable  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([dealershipId, vehicleId])
+}
