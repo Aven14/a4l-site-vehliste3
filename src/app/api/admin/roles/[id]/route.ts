@@ -28,7 +28,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       canImport: data.canImport,
       canManageUsers: data.canManageUsers,
       canManageRoles: data.canManageRoles,
+      // @ts-ignore
       canManageDealerships: data.canManageDealerships,
+      // @ts-ignore
       canManageSite: data.canManageSite,
     },
   })

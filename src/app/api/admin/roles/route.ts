@@ -14,22 +14,14 @@ export async function GET() {
   }
 
   try {
-    const result = await query(
-      `SELECT r.id, r.name, COUNT(u.id) as users_count
-       FROM "Role" r
-       LEFT JOIN "User" u ON r.id = u."roleId"
-       GROUP BY r.id
-       ORDER BY r.name ASC`,
-      []
-    )
-
-    const roles = result.rows.map((row: any) => ({
-      id: row.id,
-      name: row.name,
-      _count: {
-        users: parseInt(row.users_count, 10)
-      }
-    }))
+    const roles = await prisma.role.findMany({
+      include: {
+        _count: {
+          select: { users: true }
+        }
+      },
+      orderBy: { name: 'asc' }
+    })
 
     return NextResponse.json(roles)
   } catch (error) {
@@ -58,6 +50,10 @@ export async function POST(req: NextRequest) {
       canImport: data.canImport || false,
       canManageUsers: data.canManageUsers || false,
       canManageRoles: data.canManageRoles || false,
+      // @ts-ignore
+      canManageDealerships: data.canManageDealerships || false,
+      // @ts-ignore
+      canManageSite: data.canManageSite || false,
       isSystem: false,
     },
   })
