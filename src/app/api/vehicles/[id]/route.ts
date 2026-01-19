@@ -40,9 +40,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       }
     }
 
-    const response = NextResponse.json(vehicle)
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
-    return response
+    return NextResponse.json(vehicle)
   } catch (error) {
     console.error('Vehicle GET error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

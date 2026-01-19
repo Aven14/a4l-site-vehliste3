@@ -48,9 +48,7 @@ export async function GET(req: NextRequest) {
       }
     }))
 
-    const response = NextResponse.json(vehicles)
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
-    return response
+    return NextResponse.json(vehicles)
   } catch (error) {
     console.error('Erreur GET /api/vehicles:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
