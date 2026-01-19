@@ -204,7 +204,12 @@ export default function AdminBrandsPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white">{brand.name}</h3>
-                  <p className="text-sm text-gray-500">{brand._count.vehicles} véhicules</p>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm text-gray-500">{brand._count.vehicles} véhicules</p>
+                    <p className="text-xs text-primary-400">
+                      📍 {brand.dealershipName || 'Non défini'} ({brand.dealershipLocation || '?'})
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">

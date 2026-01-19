@@ -19,9 +19,7 @@ export async function GET() {
       orderBy: { name: 'asc' }
     })
     
-    const response = NextResponse.json(brands)
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
-    return response
+    return NextResponse.json(brands)
   } catch (error) {
     console.error('Erreur GET /api/brands:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })

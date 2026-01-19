@@ -22,9 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Marque non trouvée' }, { status: 404 })
     }
 
-    const response = NextResponse.json(brand)
-    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
-    return response
+    return NextResponse.json(brand)
   } catch (error) {
     console.error('Brand GET error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
