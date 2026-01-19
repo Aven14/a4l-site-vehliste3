@@ -10,18 +10,14 @@ export const dynamic = 'force-dynamic'
 // GET - Liste toutes les marques
 export async function GET() {
   try {
-    const result = await query(
-      `SELECT id, name, logo, (SELECT COUNT(*) FROM "Vehicle" WHERE "brandId" = "Brand".id) as vehicle_count 
-       FROM "Brand" 
-       ORDER BY name ASC`
-    )
-    
-    const brands = result.rows.map((row: any) => ({
-      id: row.id,
-      name: row.name,
-      logo: row.logo,
-      _count: { vehicles: parseInt(row.vehicle_count) }
-    }))
+    const brands = await prisma.brand.findMany({
+      include: {
+        _count: {
+          select: { vehicles: true }
+        }
+      },
+      orderBy: { name: 'asc' }
+    })
     
     const response = NextResponse.json(brands)
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
@@ -39,14 +35,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
 
-  const { name, logo } = await req.json()
+  const { name, logo, dealershipName, dealershipLocation } = await req.json()
   
   if (!name) {
     return NextResponse.json({ error: 'Nom requis' }, { status: 400 })
   }
 
   const brand = await prisma.brand.create({
-    data: { name, logo },
+    data: { 
+      name, 
+      logo,
+      // @ts-ignore
+      dealershipName: dealershipName || 'Concessionnaire',
+      // @ts-ignore
+      dealershipLocation: dealershipLocation || 'Inconnu'
+    },
   })
 
   return NextResponse.json(brand, { status: 201 })

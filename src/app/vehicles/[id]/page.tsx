@@ -27,7 +27,7 @@ export default async function VehiclePage({ params }: { params: { id: string } }
   const insuranceT4 = Math.round(vehicle.price * 0.30)
 
   // Lieu d'achat
-  const dealership = getDealershipLocation(vehicle.brand.name, vehicle.category)
+  const dealership = getDealershipLocation(vehicle.brand, vehicle.category)
 
   return (
     <div className="min-h-screen py-12 px-4">

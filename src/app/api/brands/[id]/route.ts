@@ -9,33 +9,20 @@ export const dynamic = 'force-dynamic'
 // GET - Détail d'une marque
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Get brand
-    const brandResult = await query(
-      `SELECT id, name, logo FROM "Brand" WHERE id = $1`,
-      [params.id]
-    )
+    const brand = await prisma.brand.findUnique({
+      where: { id: params.id },
+      include: {
+        vehicles: {
+          orderBy: { name: 'asc' }
+        }
+      }
+    })
 
-    if (brandResult.rows.length === 0) {
+    if (!brand) {
       return NextResponse.json({ error: 'Marque non trouvée' }, { status: 404 })
     }
 
-    const brand = brandResult.rows[0]
-
-    // Get vehicles for this brand
-    const vehiclesResult = await query(
-      `SELECT id, name, description, price, power, trunk, vmax, seats, images, "brandId"
-       FROM "Vehicle"
-       WHERE "brandId" = $1
-       ORDER BY name ASC`,
-      [params.id]
-    )
-
-    const result = {
-      ...brand,
-      vehicles: vehiclesResult.rows
-    }
-
-    const response = NextResponse.json(result)
+    const response = NextResponse.json(brand)
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
     return response
   } catch (error) {
@@ -51,11 +38,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
 
-  const { name, logo } = await req.json()
+  const { name, logo, dealershipName, dealershipLocation } = await req.json()
 
   const brand = await prisma.brand.update({
     where: { id: params.id },
-    data: { name, logo },
+    data: { 
+      name, 
+      logo,
+      // @ts-ignore
+      dealershipName,
+      // @ts-ignore
+      dealershipLocation
+    },
   })
 
   return NextResponse.json(brand)

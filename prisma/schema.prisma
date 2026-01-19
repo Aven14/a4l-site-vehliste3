@@ -60,12 +60,14 @@ model User {
 
 // Marques de véhicules
 model Brand {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  logo      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  vehicles  Vehicle[]
+  id                String    @id @default(cuid())
+  name              String    @unique
+  logo              String?
+  dealershipName    String?   @default("Concessionnaire")
+  dealershipLocation String?  @default("Inconnu")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  vehicles          Vehicle[]
 }
 
 // Véhicules

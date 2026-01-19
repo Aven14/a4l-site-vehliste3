@@ -3,11 +3,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { IG_DEALERSHIPS } from '@/lib/dealerships'
 
 interface Brand {
   id: string
   name: string
   logo: string | null
+  dealershipName: string | null
+  dealershipLocation: string | null
   _count: { vehicles: number }
 }
 
@@ -19,7 +22,12 @@ export default function AdminBrandsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ name: '', logo: '' })
+  const [form, setForm] = useState({ 
+    name: '', 
+    logo: '',
+    dealershipName: IG_DEALERSHIPS[0].name,
+    dealershipLocation: IG_DEALERSHIPS[0].location
+  })
 
   const user = session?.user as any
   const canEdit = user?.role === 'superadmin' || user?.role === 'admin' || user?.canEditBrands
@@ -60,13 +68,23 @@ export default function AdminBrandsPage() {
 
     setShowForm(false)
     setEditingBrand(null)
-    setForm({ name: '', logo: '' })
+    setForm({ 
+      name: '', 
+      logo: '', 
+      dealershipName: IG_DEALERSHIPS[0].name, 
+      dealershipLocation: IG_DEALERSHIPS[0].location 
+    })
     fetchBrands()
   }
 
   const handleEdit = (brand: Brand) => {
     setEditingBrand(brand)
-    setForm({ name: brand.name, logo: brand.logo || '' })
+    setForm({ 
+      name: brand.name, 
+      logo: brand.logo || '',
+      dealershipName: brand.dealershipName || IG_DEALERSHIPS[0].name,
+      dealershipLocation: brand.dealershipLocation || IG_DEALERSHIPS[0].location
+    })
     setShowForm(true)
   }
 
@@ -88,7 +106,16 @@ export default function AdminBrandsPage() {
             Gestion des <span className="text-primary-400">Marques</span>
           </h1>
           {canEdit && (
-            <button onClick={() => { setShowForm(true); setEditingBrand(null); setForm({ name: '', logo: '' }); }} className="btn-primary">
+            <button onClick={() => { 
+              setShowForm(true); 
+              setEditingBrand(null); 
+              setForm({ 
+                name: '', 
+                logo: '',
+                dealershipName: IG_DEALERSHIPS[0].name,
+                dealershipLocation: IG_DEALERSHIPS[0].location
+              }); 
+            }} className="btn-primary">
               + Nouvelle marque
             </button>
           )}
@@ -132,6 +159,24 @@ export default function AdminBrandsPage() {
                   className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
                   placeholder="/images/brands/..."
                 />
+              </div>
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">Concessionnaire en jeu *</label>
+                <select
+                  required
+                  value={`${form.dealershipName}|${form.dealershipLocation}`}
+                  onChange={(e) => {
+                    const [name, location] = e.target.value.split('|')
+                    setForm({ ...form, dealershipName: name, dealershipLocation: location })
+                  }}
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                >
+                  {IG_DEALERSHIPS.map((d, i) => (
+                    <option key={i} value={`${d.name}|${d.location}`}>
+                      {d.name} ({d.location})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1">

@@ -1,7 +1,28 @@
-// Fonction pour déterminer le concessionnaire selon la marque et la catégorie
+// Liste des concessionnaires officiels en jeu
+export const IG_DEALERSHIPS = [
+  { name: 'Concessionnaire A-F', location: 'Perrytonia' },
+  { name: 'Concessionnaire G-L', location: 'Los Diablos' },
+  { name: 'Concessionnaire M-R', location: 'Jamestown' },
+  { name: 'Concessionnaire S-Z', location: 'Watergate' },
+  { name: 'Concessionnaire Moto/Quad', location: 'Woodland Heights' },
+  { name: 'Concessionnaire Transports', location: 'Lakeside' },
+  { name: 'Concessionnaire Aérien', location: 'Aux Aéroports' },
+  { name: 'Concessionnaire Maritime', location: 'Aux Ports' },
+  { name: 'Concessionnaire EVENT', location: 'Palm' },
+]
 
-export function getDealershipLocation(brandName: string, category?: string | null): { name: string; location: string } {
-  // Catégories spéciales
+// Fonction pour déterminer le concessionnaire selon la marque et la catégorie
+// Note: Cette fonction est conservée pour la compatibilité mais les marques devraient maintenant
+// avoir leur concessionnaire défini manuellement en base de données.
+export function getDealershipLocation(brand: any, category?: string | null): { name: string; location: string } {
+  // Si la marque a déjà un concessionnaire défini manuellement
+  if (brand.dealershipName && brand.dealershipLocation && brand.dealershipLocation !== 'Inconnu') {
+    return { name: brand.dealershipName, location: brand.dealershipLocation }
+  }
+
+  const brandName = typeof brand === 'string' ? brand : brand.name
+
+  // Catégories spéciales (fallback)
   if (category) {
     const cat = category.toLowerCase()
     if (cat === 'moto' || cat === 'quad') {
