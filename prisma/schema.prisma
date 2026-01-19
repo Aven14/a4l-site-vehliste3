@@ -21,6 +21,8 @@ model Role {
   canImport        Boolean  @default(false)
   canManageUsers   Boolean  @default(false)
   canManageRoles   Boolean  @default(false)
+  canManageDealerships Boolean @default(false)
+  canManageSite     Boolean @default(false)
   isSystem         Boolean  @default(false) // true pour superadmin/admin/user
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
