@@ -147,6 +147,7 @@ export default function AdminVehiclesPage() {
       seats: v.seats?.toString() || '',
     })
     setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = async (id: string) => {

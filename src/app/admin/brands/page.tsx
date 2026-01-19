@@ -86,6 +86,7 @@ export default function AdminBrandsPage() {
       dealershipLocation: brand.dealershipLocation || IG_DEALERSHIPS[0].location
     })
     setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = async (id: string) => {
