@@ -132,7 +132,7 @@ export default function AdminRolesPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="font-display text-3xl font-bold text-white">
-            Gestion des <span className="text-primary-400">Rôles</span>
+            Gestion des <span className="text-purple-400">Rôles</span>
           </h1>
           <button onClick={() => { setShowForm(true); setEditingRole(null); resetForm(); }} className="btn-primary">
             + Nouveau rôle
@@ -154,7 +154,7 @@ export default function AdminRolesPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   disabled={editingRole?.isSystem}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none disabled:opacity-50"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none disabled:opacity-50"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export default function AdminRolesPage() {
                       checked={form.canAccessAdmin}
                       onChange={(e) => setForm({ ...form, canAccessAdmin: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Accès Panel Admin</span>
                   </label>
@@ -177,7 +177,7 @@ export default function AdminRolesPage() {
                       checked={form.canEditBrands}
                       onChange={(e) => setForm({ ...form, canEditBrands: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Modifier marques</span>
                   </label>
@@ -187,7 +187,7 @@ export default function AdminRolesPage() {
                       checked={form.canDeleteBrands}
                       onChange={(e) => setForm({ ...form, canDeleteBrands: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Supprimer marques</span>
                   </label>
@@ -197,7 +197,7 @@ export default function AdminRolesPage() {
                       checked={form.canEditVehicles}
                       onChange={(e) => setForm({ ...form, canEditVehicles: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Modifier véhicules</span>
                   </label>
@@ -207,7 +207,7 @@ export default function AdminRolesPage() {
                       checked={form.canDeleteVehicles}
                       onChange={(e) => setForm({ ...form, canDeleteVehicles: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Supprimer véhicules</span>
                   </label>
@@ -217,7 +217,7 @@ export default function AdminRolesPage() {
                       checked={form.canManageDealerships}
                       onChange={(e) => setForm({ ...form, canManageDealerships: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-yellow-500 focus:ring-yellow-500"
                     />
                     <span className="text-gray-300">Gérer les concessionnaires</span>
                   </label>
@@ -227,7 +227,7 @@ export default function AdminRolesPage() {
                       checked={form.canManageSite}
                       onChange={(e) => setForm({ ...form, canManageSite: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-yellow-500 focus:ring-yellow-500"
                     />
                     <span className="text-gray-300">Gérer le site</span>
                   </label>
@@ -237,7 +237,7 @@ export default function AdminRolesPage() {
                       checked={form.canImport}
                       onChange={(e) => setForm({ ...form, canImport: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-purple-500 focus:ring-purple-500"
                     />
                     <span className="text-gray-300">Import JSON</span>
                   </label>
@@ -247,7 +247,7 @@ export default function AdminRolesPage() {
                       checked={form.canManageUsers}
                       onChange={(e) => setForm({ ...form, canManageUsers: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-yellow-500 focus:ring-yellow-500"
                     />
                     <span className="text-yellow-300">Gérer utilisateurs</span>
                   </label>
@@ -257,7 +257,7 @@ export default function AdminRolesPage() {
                       checked={form.canManageRoles}
                       onChange={(e) => setForm({ ...form, canManageRoles: e.target.checked })}
                       disabled={editingRole?.isSystem}
-                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-yellow-500 focus:ring-yellow-500"
                     />
                     <span className="text-yellow-300">Gérer rôles</span>
                   </label>
@@ -279,7 +279,7 @@ export default function AdminRolesPage() {
         {/* Liste des rôles */}
         <div className="space-y-4">
           {roles.map((role) => (
-            <div key={role.id} className={`card p-6 ${role.isSystem ? 'border-gray-700' : 'border-primary-500/30'}`}>
+            <div key={role.id} className={`card p-6 ${role.isSystem ? 'border-gray-700' : 'border-purple-500/30'}`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -304,15 +304,15 @@ export default function AdminRolesPage() {
 
               <div className="flex flex-wrap gap-2">
                 {role.canAccessAdmin && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Panel Admin</span>}
-                {role.canEditBrands && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Modif Marques</span>}
+                {role.canEditBrands && <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Modif Marques</span>}
                 {role.canDeleteBrands && <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Suppr Marques</span>}
-                {role.canEditVehicles && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Modif Véhicules</span>}
+                {role.canEditVehicles && <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Modif Véhicules</span>}
                 {role.canDeleteVehicles && <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Suppr Véhicules</span>}
-                {role.canImport && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Import</span>}
-                {role.canManageUsers && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Gérer Users</span>}
-                {role.canManageRoles && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Gérer Rôles</span>}
-                {role.canManageDealerships && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Gérer Les Concessionnaires</span>}
-                {role.canManageSite && <span className="text-xs bg-primary-500/20 text-primary-400 px-2 py-1 rounded">Gérer Le Site</span>}
+                {role.canImport && <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">Import</span>}
+                {role.canManageUsers && <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">Gérer Users</span>}
+                {role.canManageRoles && <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">Gérer Rôles</span>}
+                {role.canManageDealerships && <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">Gérer Les Concessionnaires</span>}
+                {role.canManageSite && <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">Gérer Le Site</span>}
               </div>
             </div>
           ))}

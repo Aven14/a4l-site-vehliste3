@@ -110,7 +110,7 @@ export default async function VehiclePage({ params }: { params: { id: string } }
                 </div>
                 <div className="bg-dark-300 rounded-lg p-3">
                   <div className="text-gray-500 text-xs">Tier 4 (30%)</div>
-                  <div className="font-display text-lg font-bold text-primary-400">{insuranceT4.toLocaleString()} €</div>
+                  <div className="font-display text-lg font-bold text-purple-400">{insuranceT4.toLocaleString()} €</div>
                 </div>
               </div>
             </div>

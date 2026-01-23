@@ -79,17 +79,17 @@ export default async function AdminPage() {
           )}
           
           {user.canManageUsers && (
-            <Link href="/admin/users" className="card card-hover p-8 text-center border-primary-500/30">
+            <Link href="/admin/users" className="card card-hover p-8 text-center border-yellow-500/30">
               <div className="text-4xl mb-4">👥</div>
-              <h2 className="font-display text-xl font-bold text-primary-400 mb-2">Gestion des utilisateurs</h2>
+              <h2 className="font-display text-xl font-bold text-yellow-400 mb-2">Gestion des utilisateurs</h2>
               <p className="text-gray-500">Gérer les rôles et permissions</p>
             </Link>
           )}
           
           {user.canManageRoles && (
-            <Link href="/admin/roles" className="card card-hover p-8 text-center border-primary-500/30">
+            <Link href="/admin/roles" className="card card-hover p-8 text-center border-purple-500/30">
               <div className="text-4xl mb-4">🎭</div>
-              <h2 className="font-display text-xl font-bold text-primary-400 mb-2">Gestion des rôles</h2>
+              <h2 className="font-display text-xl font-bold text-purple-400 mb-2">Gestion des rôles</h2>
               <p className="text-gray-500">Créer et configurer des rôles</p>
             </Link>
           )}
@@ -103,9 +103,9 @@ export default async function AdminPage() {
           )}
           
           {user.canManageSite && (
-            <Link href="/admin/settings" className="card card-hover p-8 text-center border-primary-500/30">
+            <Link href="/admin/settings" className="card card-hover p-8 text-center border-blue-500/30">
               <div className="text-4xl mb-4">⚙️</div>
-              <h2 className="font-display text-xl font-bold text-primary-400 mb-2">Paramètres du site</h2>
+              <h2 className="font-display text-xl font-bold text-blue-400 mb-2">Paramètres du site</h2>
               <p className="text-gray-500">Logo et favicon du site</p>
             </Link>
           )}

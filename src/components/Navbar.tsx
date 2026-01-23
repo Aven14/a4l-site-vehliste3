@@ -53,7 +53,7 @@ export function Navbar() {
                     Panel
                   </Link>
                 )}
-                <Link href="/account" className="text-primary-400 hover:text-primary-300 transition font-medium">
+                <Link href="/account" className="text-blue-400 hover:text-blue-300 transition font-medium">
                   Compte
                 </Link>
                 <button
