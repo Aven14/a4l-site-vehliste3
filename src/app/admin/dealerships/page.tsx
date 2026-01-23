@@ -37,10 +37,13 @@ export default function AdminDealerships() {
     userId: '',
   })
 
+  const user = session?.user as any
+  const canAccess = user?.roleName === 'superadmin' || user?.canManageDealerships
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/')
-    if (!session?.user?.canAccessAdmin) router.push('/')
-  }, [status, session, router])
+    if (status === 'authenticated' && !canAccess) router.push('/admin')
+  }, [status, canAccess, router])
 
   useEffect(() => {
     if (session?.user) {

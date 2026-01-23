@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState('')
 
   const user = session?.user as any
-  const canAccess = user?.role === 'superadmin' || user?.role === 'admin' || user?.canAccessAdmin
+  const canAccess = user?.roleName === 'superadmin' || user?.canManageSite
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/login')

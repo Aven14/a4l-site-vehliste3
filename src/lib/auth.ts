@@ -31,20 +31,24 @@ export const authOptions: NextAuthOptions = {
           throw new Error('UNVERIFIED')
         }
 
+        const isSuperAdmin = user.role?.name === 'superadmin'
+
         return {
           id: user.id,
           name: user.username,
           email: user.email,
           themeColor: user.themeColor || undefined,
           roleName: user.role?.name || 'user',
-          canAccessAdmin: user.role?.canAccessAdmin || false,
-          canEditBrands: user.role?.canEditBrands || false,
-          canEditVehicles: user.role?.canEditVehicles || false,
-          canDeleteBrands: user.role?.canDeleteBrands || false,
-          canDeleteVehicles: user.role?.canDeleteVehicles || false,
-          canImport: user.role?.canImport || false,
-          canManageUsers: user.role?.canManageUsers || false,
-          canManageRoles: user.role?.canManageRoles || false,
+          canAccessAdmin: isSuperAdmin || user.role?.canAccessAdmin || false,
+          canEditBrands: isSuperAdmin || user.role?.canEditBrands || false,
+          canEditVehicles: isSuperAdmin || user.role?.canEditVehicles || false,
+          canDeleteBrands: isSuperAdmin || user.role?.canDeleteBrands || false,
+          canDeleteVehicles: isSuperAdmin || user.role?.canDeleteVehicles || false,
+          canImport: isSuperAdmin || user.role?.canImport || false,
+          canManageUsers: isSuperAdmin || user.role?.canManageUsers || false,
+          canManageRoles: isSuperAdmin || user.role?.canManageRoles || false,
+          canManageDealerships: isSuperAdmin || user.role?.canManageDealerships || false,
+          canManageSite: isSuperAdmin || user.role?.canManageSite || false,
           dealership: user.dealership ? true : false,
         }
       },
@@ -70,6 +74,8 @@ export const authOptions: NextAuthOptions = {
         token.canImport = user.canImport
         token.canManageUsers = user.canManageUsers
         token.canManageRoles = user.canManageRoles
+        token.canManageDealerships = user.canManageDealerships
+        token.canManageSite = user.canManageSite
         token.dealership = user.dealership
       } else if (token.sub) {
         // Rafraîchir les données depuis la base de données quand l'utilisateur n'est pas défini
@@ -77,17 +83,20 @@ export const authOptions: NextAuthOptions = {
           where: { id: token.sub },
           include: { role: true, dealership: true },
         })
+        const isSuperAdmin = dbUser.role?.name === 'superadmin'
         if (dbUser) {
           token.themeColor = dbUser.themeColor || undefined
           token.roleName = dbUser.role?.name || 'user'
-          token.canAccessAdmin = dbUser.role?.canAccessAdmin || false
-          token.canEditBrands = dbUser.role?.canEditBrands || false
-          token.canEditVehicles = dbUser.role?.canEditVehicles || false
-          token.canDeleteBrands = dbUser.role?.canDeleteBrands || false
-          token.canDeleteVehicles = dbUser.role?.canDeleteVehicles || false
-          token.canImport = dbUser.role?.canImport || false
-          token.canManageUsers = dbUser.role?.canManageUsers || false
-          token.canManageRoles = dbUser.role?.canManageRoles || false
+          token.canAccessAdmin = isSuperAdmin || dbUser.role?.canAccessAdmin || false
+          token.canEditBrands = isSuperAdmin || dbUser.role?.canEditBrands || false
+          token.canEditVehicles = isSuperAdmin || dbUser.role?.canEditVehicles || false
+          token.canDeleteBrands = isSuperAdmin || dbUser.role?.canDeleteBrands || false
+          token.canDeleteVehicles = isSuperAdmin || dbUser.role?.canDeleteVehicles || false
+          token.canImport = isSuperAdmin || dbUser.role?.canImport || false
+          token.canManageUsers = isSuperAdmin || dbUser.role?.canManageUsers || false
+          token.canManageRoles = isSuperAdmin || dbUser.role?.canManageRoles || false
+          token.canManageDealerships = isSuperAdmin || dbUser.role?.canManageDealerships || false
+          token.canManageSite = isSuperAdmin || dbUser.role?.canManageSite || false
           token.dealership = dbUser.dealership ? true : false
         }
       }
@@ -105,6 +114,8 @@ export const authOptions: NextAuthOptions = {
         session.user.canImport = token.canImport as boolean
         session.user.canManageUsers = token.canManageUsers as boolean
         session.user.canManageRoles = token.canManageRoles as boolean
+        session.user.canManageDealerships = token.canManageDealerships as boolean
+        session.user.canManageSite = token.canManageSite as boolean
         session.user.dealership = token.dealership as boolean | undefined
       }
       return session
@@ -124,6 +135,8 @@ declare module 'next-auth' {
     canImport?: boolean
     canManageUsers?: boolean
     canManageRoles?: boolean
+    canManageDealerships?: boolean
+    canManageSite?: boolean
     dealership?: boolean
   }
   interface Session {
