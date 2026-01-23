@@ -63,7 +63,7 @@ function LoginContent() {
       <div className="w-full max-w-md">
         <div className="card p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center mx-auto mb-4">
               <span className="font-display font-bold text-white text-2xl">A4L</span>
             </div>
             <h1 className="font-display text-2xl font-bold text-white">Connexion</h1>
@@ -72,7 +72,7 @@ function LoginContent() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {searchParams.get('verified') === 'true' && (
-              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-green-400 text-center">
+              <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3 text-primary-400 text-center">
                 Compte vérifié avec succès ! Vous pouvez maintenant vous connecter.
               </div>
             )}
@@ -89,7 +89,7 @@ function LoginContent() {
                 name="username"
                 required
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -100,7 +100,7 @@ function LoginContent() {
                 name="password"
                 required
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -115,7 +115,7 @@ function LoginContent() {
 
           <p className="text-center text-gray-500 text-sm mt-6">
             Pas de compte ?{' '}
-            <Link href="/auth/register" className="text-green-400 hover:text-green-300">
+            <Link href="/auth/register" className="text-primary-400 hover:text-primary-300">
               S&apos;inscrire
             </Link>
           </p>

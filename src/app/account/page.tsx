@@ -220,7 +220,7 @@ function AccountContent() {
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <h1 className="font-display text-3xl font-bold text-white mb-2">
-          Mon <span className="text-blue-400">Compte</span>
+          Mon <span className="text-primary-400">Compte</span>
         </h1>
         <p className="text-gray-500 mb-8">Rôle : {user?.roleName || 'user'}</p>
 
@@ -245,7 +245,7 @@ function AccountContent() {
                 type="text"
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
             </div>
             <div>
@@ -254,7 +254,7 @@ function AccountContent() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
             </div>
             <div>
@@ -272,7 +272,7 @@ function AccountContent() {
                     value={form.themeColor}
                     onChange={(e) => setForm({ ...form, themeColor: e.target.value })}
                     placeholder="#a855f7"
-                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none font-mono"
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none font-mono"
                   />
                   <p className="text-xs text-gray-500 mt-1">Choisissez une couleur pour personnaliser le thème du site</p>
                 </div>
@@ -294,7 +294,7 @@ function AccountContent() {
                 type="password"
                 value={form.currentPassword}
                 onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
             </div>
             <div>
@@ -303,7 +303,7 @@ function AccountContent() {
                 type="password"
                 value={form.newPassword}
                 onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
             </div>
             <div>
@@ -312,7 +312,7 @@ function AccountContent() {
                 type="password"
                 value={form.confirmPassword}
                 onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">

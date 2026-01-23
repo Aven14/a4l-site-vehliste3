@@ -113,7 +113,7 @@ function VerifyContent() {
             <p className="text-gray-500 mt-2">
               Entrez le code à 6 chiffres envoyé à
             </p>
-            <p className="text-green-400 font-semibold mt-1">{email}</p>
+            <p className="text-primary-400 font-semibold mt-1">{email}</p>
           </div>
 
           {error && (
@@ -123,7 +123,7 @@ function VerifyContent() {
           )}
 
           {success && (
-            <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-green-400 text-center mb-4">
+            <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3 text-primary-400 text-center mb-4">
               {success}
             </div>
           )}
@@ -141,7 +141,7 @@ function VerifyContent() {
                 maxLength={6}
                 placeholder="000000"
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-4 text-white text-center text-2xl tracking-widest font-mono
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
                 autoFocus
               />
               <p className="text-gray-500 text-xs text-center mt-2">
@@ -163,7 +163,7 @@ function VerifyContent() {
               type="button"
               onClick={handleResendCode}
               disabled={resending}
-              className="w-full text-gray-400 hover:text-green-400 text-sm transition disabled:opacity-50"
+              className="w-full text-gray-400 hover:text-primary-400 text-sm transition disabled:opacity-50"
             >
               {resending ? 'Envoi en cours...' : 'Renvoyer le code'}
             </button>
@@ -174,7 +174,7 @@ function VerifyContent() {
                 type="button"
                 onClick={handleResendCode}
                 disabled={resending}
-                className="text-green-400 hover:text-green-300 transition disabled:opacity-50"
+                className="text-primary-400 hover:text-primary-300 transition disabled:opacity-50"
               >
                 Cliquez ici
               </button>
@@ -183,7 +183,7 @@ function VerifyContent() {
 
           <div className="mt-8 pt-6 border-t border-gray-700">
             <p className="text-center text-gray-500 text-sm">
-              <Link href="/auth/login" className="text-green-400 hover:text-green-300">
+              <Link href="/auth/login" className="text-primary-400 hover:text-primary-300">
                 Retour à la connexion
               </Link>
             </p>

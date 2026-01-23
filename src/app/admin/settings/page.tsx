@@ -120,7 +120,7 @@ export default function AdminSettingsPage() {
                 value={form.siteLogo}
                 onChange={(e) => setForm({ ...form, siteLogo: e.target.value })}
                 placeholder="/images/logo.png ou https://..."
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
               <p className="text-gray-500 text-xs mt-2">
                 URL du logo qui apparaîtra dans la barre de navigation. Laissez vide pour utiliser le logo par défaut.
@@ -145,7 +145,7 @@ export default function AdminSettingsPage() {
                 value={form.siteFavicon}
                 onChange={(e) => setForm({ ...form, siteFavicon: e.target.value })}
                 placeholder="/favicon.ico ou https://..."
-                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
               />
               <p className="text-gray-500 text-xs mt-2">
                 URL de l'icône qui apparaîtra dans l'onglet du navigateur. Laissez vide pour utiliser l'icône par défaut.

@@ -148,7 +148,7 @@ export default function AdminBrandsPage() {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -157,7 +157,7 @@ export default function AdminBrandsPage() {
                   type="text"
                   value={form.logo}
                   onChange={(e) => setForm({ ...form, logo: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                   placeholder="/images/brands/..."
                 />
               </div>
@@ -170,7 +170,7 @@ export default function AdminBrandsPage() {
                     const [name, location] = e.target.value.split('|')
                     setForm({ ...form, dealershipName: name, dealershipLocation: location })
                   }}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 >
                   {IG_DEALERSHIPS.map((d, i) => (
                     <option key={i} value={`${d.name}|${d.location}`}>
@@ -215,7 +215,7 @@ export default function AdminBrandsPage() {
               </div>
               <div className="flex gap-2">
                 {canEdit && (
-                  <button onClick={() => handleEdit(brand)} className="text-blue-400 hover:text-blue-300 px-3 py-1">
+                  <button onClick={() => handleEdit(brand)} className="text-primary-400 hover:text-primary-300 px-3 py-1">
                     Modifier
                   </button>
                 )}

@@ -202,7 +202,7 @@ export default function AdminVehiclesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="🔍 Rechercher un véhicule, une marque, une catégorie..."
-            className="w-full bg-dark-100 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+            className="w-full bg-dark-100 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
           />
         </div>
 
@@ -249,7 +249,7 @@ export default function AdminVehiclesPage() {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -258,7 +258,7 @@ export default function AdminVehiclesPage() {
                   required
                   value={form.brandId}
                   onChange={(e) => setForm({ ...form, brandId: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 >
                   <option value="">Sélectionner</option>
                   {brands.map((b) => (
@@ -273,7 +273,7 @@ export default function AdminVehiclesPage() {
                   required
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -282,7 +282,7 @@ export default function AdminVehiclesPage() {
                   type="text"
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                   placeholder="sport, supercar, moto, utilitaire..."
                 />
               </div>
@@ -292,7 +292,7 @@ export default function AdminVehiclesPage() {
                   type="number"
                   value={form.power}
                   onChange={(e) => setForm({ ...form, power: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -301,7 +301,7 @@ export default function AdminVehiclesPage() {
                   type="number"
                   value={form.vmax}
                   onChange={(e) => setForm({ ...form, vmax: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -310,7 +310,7 @@ export default function AdminVehiclesPage() {
                   type="number"
                   value={form.seats}
                   onChange={(e) => setForm({ ...form, seats: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -319,7 +319,7 @@ export default function AdminVehiclesPage() {
                   type="number"
                   value={form.trunk}
                   onChange={(e) => setForm({ ...form, trunk: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
                 />
               </div>
               <div className="md:col-span-2">
@@ -327,7 +327,7 @@ export default function AdminVehiclesPage() {
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-green-500 focus:outline-none resize-none"
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none resize-none"
                   rows={3}
                 />
               </div>
@@ -387,7 +387,7 @@ export default function AdminVehiclesPage() {
                       </div>
                       <div className="flex gap-2">
                         {canEdit && (
-                          <button onClick={() => handleEdit(v)} className="text-blue-400 hover:text-blue-300 px-3 py-1">
+                          <button onClick={() => handleEdit(v)} className="text-primary-400 hover:text-primary-300 px-3 py-1">
                             Modifier
                           </button>
                         )}

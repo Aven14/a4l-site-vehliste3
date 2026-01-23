@@ -44,7 +44,7 @@ export function Navbar() {
             {session ? (
               <div className="flex items-center gap-3">
                 {user?.dealership && (
-                  <Link href="/dealership" className="text-green-400 hover:text-green-300 transition font-medium">
+                  <Link href="/dealership" className="text-primary-400 hover:text-primary-300 transition font-medium">
                     Concess
                   </Link>
                 )}
@@ -53,7 +53,7 @@ export function Navbar() {
                     Panel
                   </Link>
                 )}
-                <Link href="/account" className="text-blue-400 hover:text-blue-300 transition font-medium">
+                <Link href="/account" className="text-primary-400 hover:text-primary-300 transition font-medium">
                   Compte
                 </Link>
                 <button

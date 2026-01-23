@@ -76,7 +76,7 @@ export default function RegisterPage() {
                 name="username"
                 required
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -87,7 +87,7 @@ export default function RegisterPage() {
                 name="email"
                 required
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -99,7 +99,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 required
                 minLength={6}
                 className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white
-                         focus:border-green-500 focus:outline-none transition"
+                         focus:border-primary-500 focus:outline-none transition"
               />
             </div>
 
@@ -126,7 +126,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-gray-500 text-sm mt-6">
             Déjà un compte ?{' '}
-            <Link href="/auth/login" className="text-green-400 hover:text-green-300">
+            <Link href="/auth/login" className="text-primary-400 hover:text-primary-300">
               Se connecter
             </Link>
           </p>

@@ -34,7 +34,7 @@ function ConfirmPasswordContent() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="card p-8 text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="font-display font-bold text-white text-2xl">A4L</span>
           </div>
           <h1 className="font-display text-2xl font-bold text-white mb-4">
@@ -44,7 +44,7 @@ function ConfirmPasswordContent() {
             Veuillez patienter pendant que nous confirmons votre changement de mot de passe.
           </p>
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
           </div>
         </div>
       </div>
