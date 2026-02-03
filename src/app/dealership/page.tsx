@@ -5,6 +5,26 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import ImageUpload from '@/components/ImageUpload'
 
+interface DealershipInfo {
+  id: string
+  name: string
+  description: string | null
+  logo: string | null
+  _count: {
+    listings: number
+  }
+}
+
+interface DealershipInfo {
+  id: string
+  name: string
+  description: string | null
+  logo: string | null
+  _count: {
+    listings: number
+  }
+}
+
 interface Brand {
   id: string
   name: string
@@ -17,6 +37,7 @@ interface Vehicle {
   brand: { id: string; name: string }
   price: number
   power: number | null
+  images: string
 }
 
 interface Listing {
@@ -41,6 +62,12 @@ export default function DealershipDashboard() {
   const [selectedBrand, setSelectedBrand] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [imageUrls, setImageUrls] = useState<string[]>([])
+  const [dealershipInfo, setDealershipInfo] = useState<DealershipInfo | null>(null)
+  const [isEditingDealership, setIsEditingDealership] = useState(false)
+  const [dealershipEditForm, setDealershipEditForm] = useState({
+    name: '',
+    description: '',
+  })
 
   const [formData, setFormData] = useState({
     vehicleId: '',
@@ -48,6 +75,7 @@ export default function DealershipDashboard() {
     mileage: '',
     description: '',
   })
+  const [useSiteImages, setUseSiteImages] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/login')
@@ -63,6 +91,19 @@ export default function DealershipDashboard() {
             setListings(data)
           }
           setLoading(false)
+        })
+
+      // Récupérer les infos du concessionnaire
+      fetch('/api/dealerships/my-dealership')
+        .then(res => res.json())
+        .then(data => {
+          if (data.id) {
+            setDealershipInfo(data)
+            setDealershipEditForm({
+              name: data.name,
+              description: data.description || '',
+            })
+          }
         })
 
       // Récupérer tous les véhicules disponibles
@@ -116,6 +157,9 @@ export default function DealershipDashboard() {
     }
 
     try {
+      const selectedVehicle = vehicles.find(v => v.id === formData.vehicleId)
+      const siteImages = selectedVehicle?.images ? JSON.parse(selectedVehicle.images) : []
+
       const res = await fetch('/api/dealerships/my-dealership/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,7 +168,7 @@ export default function DealershipDashboard() {
           price: parseInt(formData.price),
           mileage: formData.mileage ? parseInt(formData.mileage) : null,
           description: formData.description || null,
-          images: imageUrls.length > 0 ? imageUrls : null,
+          images: useSiteImages && siteImages.length > 0 ? siteImages : (imageUrls.length > 0 ? imageUrls : null),
         }),
       })
 
@@ -170,6 +214,31 @@ export default function DealershipDashboard() {
     }
   }
 
+  const handleUpdateDealership = async () => {
+    try {
+      const res = await fetch('/api/dealerships/my-dealership', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: dealershipEditForm.name,
+          description: dealershipEditForm.description,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage('Informations du concessionnaire mises à jour avec succès!')
+        setDealershipInfo(data)
+        setIsEditingDealership(false)
+      } else {
+        setError(data.error || 'Erreur lors de la mise à jour')
+      }
+    } catch (err) {
+      setError('Une erreur est survenue')
+    }
+  }
+
   if (status === 'loading' || loading) {
     return <div className="min-h-screen flex items-center justify-center text-gray-500">Chargement...</div>
   }
@@ -194,120 +263,212 @@ export default function DealershipDashboard() {
         )}
 
         {/* Ajouter une annonce */}
-        <div className="card p-6 mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl font-bold text-white">Ajouter une annonce</h2>
-            <button
-              onClick={() => setShowAddForm(!showAddForm)}
+        <div className="mb-8">
+          <div className="card p-6 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold text-white mb-1">{dealershipInfo?.name || 'Mon Concessionnaire'}</h2>
+              <p className="text-gray-500 text-sm">{dealershipInfo?._count.listings} véhicule{dealershipInfo?._count.listings !== 1 ? 's' : ''} en vente</p>
+            </div>
+            <button 
+              onClick={() => {
+                setIsEditingDealership(true)
+                setDealershipEditForm({
+                  name: dealershipInfo?.name || '',
+                  description: dealershipInfo?.description || '',
+                })
+              }}
               className="btn-primary text-sm py-2 px-4"
             >
-              {showAddForm ? 'Annuler' : '+ Nouvelle annonce'}
+              Modifier
             </button>
           </div>
+        </div>
 
-          {showAddForm && (
-            <form onSubmit={handleAddListing} className="space-y-4">
-              {/* Filtres de sélection */}
-              <div className="grid md:grid-cols-2 gap-4">
+        {/* Formulaire d'édition du concessionnaire */}
+        {isEditingDealership && (
+          <div className="card p-6 mb-12">
+            <h2 className="font-display text-2xl font-bold text-white mb-6">Modifier les informations du concessionnaire</h2>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault()
+                handleUpdateDealership()
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">Nom du concessionnaire *</label>
+                <input
+                  type="text"
+                  value={dealershipEditForm.name}
+                  onChange={(e) => setDealershipEditForm({...dealershipEditForm, name: e.target.value})}
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">Description</label>
+                <textarea
+                  value={dealershipEditForm.description}
+                  onChange={(e) => setDealershipEditForm({...dealershipEditForm, description: e.target.value})}
+                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                  rows={3}
+                  placeholder="Décrivez votre concessionnaire..."
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingDealership(false)}
+                  className="btn-secondary flex-1"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary flex-1"
+                >
+                  Enregistrer les modifications
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {!isEditingDealership && (
+          <div className="card p-6 mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-bold text-white">Ajouter une annonce</h2>
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="btn-primary text-sm py-2 px-4"
+              >
+                {showAddForm ? 'Annuler' : '+ Nouvelle annonce'}
+              </button>
+            </div>
+
+            {showAddForm && (
+              <form onSubmit={handleAddListing} className="space-y-4">
+                {/* Filtres de sélection */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-400 text-sm mb-2">Filtrer par marque</label>
+                    <select
+                      value={selectedBrand}
+                      onChange={(e) => setSelectedBrand(e.target.value)}
+                      className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    >
+                      <option value="">Toutes les marques</option>
+                      {brands.map(b => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 text-sm mb-2">Rechercher un véhicule</label>
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="🔍 Nom du véhicule..."
+                      className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Sélection du véhicule */}
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">Filtrer par marque</label>
+                  <label className="block text-gray-400 text-sm mb-2">Véhicule * ({filteredVehicles.length} disponible{filteredVehicles.length > 1 ? 's' : ''})</label>
                   <select
-                    value={selectedBrand}
-                    onChange={(e) => setSelectedBrand(e.target.value)}
+                    value={formData.vehicleId}
+                    onChange={(e) => {
+                      setFormData({ ...formData, vehicleId: e.target.value })
+                      // Reset image selection when vehicle changes
+                      if (useSiteImages) {
+                        setImageUrls([])
+                      }
+                    }}
                     className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    required
                   >
-                    <option value="">Toutes les marques</option>
-                    {brands.map(b => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
+                    <option value="">Sélectionner un véhicule</option>
+                    {filteredVehicles.map(v => (
+                      <option key={v.id} value={v.id}>
+                        {v.brand.name} {v.name} - {v.price.toLocaleString()}€
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">Rechercher un véhicule</label>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="🔍 Nom du véhicule..."
-                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Sélection du véhicule */}
-              <div>
-                <label className="block text-gray-400 text-sm mb-2">Véhicule * ({filteredVehicles.length} disponible{filteredVehicles.length > 1 ? 's' : ''})</label>
-                <select
-                  value={formData.vehicleId}
-                  onChange={(e) => setFormData({ ...formData, vehicleId: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                  required
-                >
-                  <option value="">Sélectionner un véhicule</option>
-                  {filteredVehicles.map(v => (
-                    <option key={v.id} value={v.id}>
-                      {v.brand.name} {v.name} - {v.price.toLocaleString()}€
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Prix et kilométrage */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">Prix (€) *</label>
-                  <input
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                    placeholder="0"
-                    required
-                  />
+                {/* Option pour choisir les images */}
+                <div className="flex items-center gap-4 pt-2">
+                  <label className="flex items-center gap-2 text-gray-400 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={useSiteImages}
+                      onChange={(e) => setUseSiteImages(e.target.checked)}
+                      className="w-4 h-4 rounded bg-dark-300 border-gray-600 text-primary-500 focus:ring-primary-500"
+                    />
+                    <span>Utiliser les images du site</span>
+                  </label>
                 </div>
 
+                {/* Prix et kilométrage */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-400 text-sm mb-2">Prix (€) *</label>
+                    <input
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                      placeholder="0"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 text-sm mb-2">Kilométrage (km)</label>
+                    <input
+                      type="number"
+                      value={formData.mileage}
+                      onChange={(e) => setFormData({ ...formData, mileage: e.target.value })}
+                      className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                {/* Images */}
                 <div>
-                  <label className="block text-gray-400 text-sm mb-2">Kilométrage (km)</label>
-                  <input
-                    type="number"
-                    value={formData.mileage}
-                    onChange={(e) => setFormData({ ...formData, mileage: e.target.value })}
-                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                    placeholder="0"
+                  <label className="block text-gray-400 text-sm mb-2">Images du véhicule (Drag & Drop pour réordonner)</label>
+                  <ImageUpload 
+                    images={imageUrls} 
+                    onChange={setImageUrls} 
                   />
                 </div>
-              </div>
 
-              {/* Images */}
-              <div>
-                <label className="block text-gray-400 text-sm mb-2">Images du véhicule (Drag & Drop pour réordonner)</label>
-                <ImageUpload 
-                  images={imageUrls} 
-                  onChange={setImageUrls} 
-                />
-              </div>
+                {/* Description */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    rows={3}
+                    placeholder="Décrivez le véhicule..."
+                  />
+                </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-gray-400 text-sm mb-2">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
-                  rows={3}
-                  placeholder="Décrivez le véhicule..."
-                />
-              </div>
-
-              <button type="submit" className="btn-primary w-full">
-                Ajouter l'annonce
-              </button>
-            </form>
-          )}
-        </div>
+                <button type="submit" className="btn-primary w-full">
+                  Ajouter l'annonce
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
         {/* Annonces existantes */}
         <div>
