@@ -166,7 +166,7 @@ export default function DealershipDashboard() {
         body: JSON.stringify({
           vehicleId: formData.vehicleId,
           price: parseInt(formData.price),
-          mileage: formData.mileage ? parseInt(formData.mileage) : null,
+          mileage: formData.mileage ? Number(formData.mileage) || null : null,
           description: formData.description || null,
           images: useSiteImages && siteImages.length > 0 ? siteImages : (imageUrls.length > 0 ? imageUrls : null),
         }),
@@ -177,6 +177,16 @@ export default function DealershipDashboard() {
       if (res.ok) {
         setMessage('Annonce ajoutée avec succès!')
         setListings([data, ...listings])
+        
+        // Rafraîchir les infos du concessionnaire pour mettre à jour le nombre d'annonces
+        fetch('/api/dealerships/my-dealership')
+          .then(res => res.json())
+          .then(data => {
+            if (data.id) {
+              setDealershipInfo(data)
+            }
+          })
+        
         setFormData({
           vehicleId: '',
           price: '',
@@ -206,6 +216,15 @@ export default function DealershipDashboard() {
       if (res.ok) {
         setListings(listings.filter(l => l.id !== listingId))
         setMessage('Annonce supprimée avec succès!')
+        
+        // Rafraîchir les infos du concessionnaire pour mettre à jour le nombre d'annonces
+        fetch('/api/dealerships/my-dealership')
+          .then(res => res.json())
+          .then(data => {
+            if (data.id) {
+              setDealershipInfo(data)
+            }
+          })
       } else {
         setError('Erreur lors de la suppression')
       }

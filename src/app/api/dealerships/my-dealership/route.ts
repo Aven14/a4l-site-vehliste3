@@ -88,13 +88,20 @@ export async function PUT(req: NextRequest) {
       }
     }
 
+    const updateData: any = {}
+    if (name !== undefined) {
+      updateData.name = name
+    }
+    if (description !== undefined) {
+      updateData.description = description
+    }
+    if (logo !== undefined) {
+      updateData.logo = logo
+    }
+
     const updated = await prisma.dealership.update({
       where: { id: user.dealership.id },
-      data: {
-        name: name !== undefined ? name : undefined,
-        description: description !== undefined ? description : undefined,
-        logo: logo !== undefined ? logo : undefined,
-      },
+      data: updateData,
     })
 
     return NextResponse.json(updated)
