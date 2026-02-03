@@ -142,6 +142,13 @@ function AccountContent() {
             document.documentElement.style.setProperty('--accent-color-rgb', `${r}, ${g}, ${b}`)
           }
           
+          // Mettre à jour le formulaire local avec les nouvelles valeurs
+          setForm(prevForm => ({
+            ...prevForm,
+            username: form.username, // Nouveau nom d'utilisateur
+            email: form.email,       // Nouvel email
+          }))
+          
           await update()
           // Recharger la page après un court délai
           setTimeout(() => {
