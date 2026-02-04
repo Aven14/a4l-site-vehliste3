@@ -13,18 +13,19 @@ interface DealershipDetail {
     email: string | null
     image: string | null
   }
-  listings: Array<{
+  listings: Array<{    
     id: string
     price: number
     mileage: number | null
     description: string | null
+    images: string | null  // Images spécifiques à l'annonce
     vehicle: {
       id: string
       name: string
       brand: {
         name: string
       }
-      images: string
+      images: string  // Images du véhicule d'origine
       power: number | null
     }
   }>
@@ -34,6 +35,9 @@ export default function DealershipDetailPage({ params }: { params: { id: string 
   const [dealership, setDealership] = useState<DealershipDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [selectedImages, setSelectedImages] = useState<string[]>([])
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showGallery, setShowGallery] = useState(false)
 
   useEffect(() => {
     fetch(`/api/dealerships/${params.id}`)
@@ -102,16 +106,32 @@ export default function DealershipDetailPage({ params }: { params: { id: string 
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dealership.listings.map(listing => {
-                const images = JSON.parse(listing.vehicle.images || '[]')
+                const images = listing.images ? JSON.parse(listing.images) : (listing.vehicle.images ? JSON.parse(listing.vehicle.images) : [])
                 return (
                   <div key={listing.id} className="card overflow-hidden group">
-                    <div className="aspect-video bg-dark-300 relative overflow-hidden">
-                      {images[0] ? (
-                        <img
-                          src={images[0]}
-                          alt={listing.vehicle.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                    <div 
+                      className="aspect-video bg-dark-300 relative overflow-hidden cursor-pointer"
+                      onClick={() => {
+                        if (images.length > 0) {
+                          setSelectedImages(images);
+                          setCurrentImageIndex(0);
+                          setShowGallery(true);
+                        }
+                      }}
+                    >
+                      {images.length > 0 ? (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={images[0]}
+                            alt={listing.vehicle.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {images.length > 1 && (
+                            <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                              {images.length} photos
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-600">
                           <span className="text-4xl">🚗</span>
@@ -143,6 +163,48 @@ export default function DealershipDetailPage({ params }: { params: { id: string 
             </div>
           )}
         </div>
+
+        {/* Galerie d'images */}
+        {showGallery && (
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+            <div className="relative w-full max-w-6xl max-h-[90vh]">
+              <button 
+                onClick={() => setShowGallery(false)}
+                className="absolute top-4 right-4 text-white text-3xl z-10 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+              >
+                ×
+              </button>
+              
+              <button 
+                onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : selectedImages.length - 1)}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-3xl z-10 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+                disabled={selectedImages.length <= 1}
+              >
+                {'‹'}
+              </button>
+              
+              <button 
+                onClick={() => setCurrentImageIndex(prev => prev < selectedImages.length - 1 ? prev + 1 : 0)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-3xl z-10 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+                disabled={selectedImages.length <= 1}
+              >
+                {'›'}
+              </button>
+              
+              <div className="h-full flex items-center justify-center">
+                <img 
+                  src={selectedImages[currentImageIndex]} 
+                  alt={`Image ${currentImageIndex + 1}`} 
+                  className="max-h-[80vh] max-w-full object-contain"
+                />
+              </div>
+              
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
+                {currentImageIndex + 1} / {selectedImages.length}
+              </div>
+            </div>
+          </div>
+        )}
 
         <Link href="/dealerships" className="text-primary-400 hover:text-primary-300 transition mt-8 inline-block">
           ← Retour aux concessionnaires

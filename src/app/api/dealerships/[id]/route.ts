@@ -29,9 +29,9 @@ export async function GET(
 
     // Récupérer les annonces
     const listingsResult = await query(
-      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl."isAvailable",
+      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl.images as listing_images, dl."isAvailable",
               v.id as vehicle_id, v.name, v.description as vehicle_description,
-              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images,
+              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images as vehicle_images,
               b.id as brand_id, b.name as brand_name, b.logo as brand_logo
        FROM "DealershipListing" dl
        JOIN "Vehicle" v ON dl."vehicleId" = v.id
@@ -56,7 +56,7 @@ export async function GET(
         trunk: row.trunk,
         vmax: row.vmax,
         seats: row.seats,
-        images: row.images,
+        images: row.listing_images || row.vehicle_images, // Priorité aux images de l'annonce
         brand: {
           id: row.brand_id,
           name: row.brand_name,

@@ -204,6 +204,75 @@ export default function DealershipDashboard() {
       setError('Une erreur est survenue')
     }
   }
+  const [editingListing, setEditingListing] = useState<any>(null)
+  const handleUpdateListing = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+
+    if (!editingListing.price) {
+      setError('Veuillez remplir tous les champs obligatoires')
+      return
+    }
+
+    try {
+      const selectedVehicle = vehicles.find(v => v.id === formData.vehicleId)
+      const siteImages = selectedVehicle?.images ? JSON.parse(selectedVehicle.images) : []
+
+      const res = await fetch(`/api/dealerships/my-dealership/listings/${editingListing.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price: parseInt(editingListing.price),
+          mileage: editingListing.mileage ? Number(editingListing.mileage) || null : null,
+          description: editingListing.description || null,
+          images: useSiteImages && siteImages.length > 0 ? siteImages : (imageUrls.length > 0 ? imageUrls : null),
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage('Annonce modifiée avec succès!')
+        setListings(listings.map(l => l.id === editingListing.id ? {...l, ...data} : l))
+        
+        // Rafraîchir les infos du concessionnaire pour mettre à jour le nombre d'annonces
+        fetch('/api/dealerships/my-dealership')
+          .then(res => res.json())
+          .then(data => {
+            if (data.id) {
+              setDealershipInfo(data)
+            }
+          })
+        
+        setEditingListing(null)
+        setFormData({
+          vehicleId: '',
+          price: '',
+          mileage: '',
+          description: '',
+        })
+        setImageUrls([])
+        setUseSiteImages(true)
+      } else {
+        setError(data.error || 'Erreur lors de la modification')
+      }
+    } catch (err) {
+      setError('Une erreur est survenue')
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingListing(null)
+    setFormData({
+      vehicleId: '',
+      price: '',
+      mileage: '',
+      description: '',
+    })
+    setImageUrls([])
+    setUseSiteImages(true)
+  }
 
   const handleDeleteListing = async (listingId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce?')) return
@@ -536,6 +605,25 @@ export default function DealershipDashboard() {
                           className="text-red-400 hover:text-red-300 text-sm transition"
                         >
                           Supprimer
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingListing({
+                              id: listing.id,
+                              price: listing.price.toString(),
+                              mileage: listing.mileage?.toString() || '',
+                              description: listing.description || '',
+                            })
+                            setImageUrls(listing.images ? JSON.parse(listing.images) : [])
+                            // Set useSiteImages based on whether the listing uses site images
+                            const vehicle = vehicles.find(v => v.id === listing.vehicle.id)
+                            const siteImages = vehicle?.images ? JSON.parse(vehicle.images) : []
+                            const listingImages = listing.images ? JSON.parse(listing.images) : []
+                            setUseSiteImages(JSON.stringify(siteImages) === JSON.stringify(listingImages))
+                          }}
+                          className="text-yellow-400 hover:text-yellow-300 text-sm transition ml-2"
+                        >
+                          Modifier
                         </button>
                       </div>
                     </div>
