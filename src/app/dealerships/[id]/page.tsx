@@ -143,6 +143,11 @@ export default function DealershipDetailPage({ params }: { params: { id: string 
                       <h3 className="font-display text-lg font-bold text-white mb-2">
                         {listing.vehicle.name}
                       </h3>
+                      {listing.description && (
+                        <p className="text-gray-400 text-sm mb-2">
+                          {listing.description}
+                        </p>
+                      )}
                       {listing.mileage && (
                         <p className="text-gray-500 text-sm mb-2">
                           {listing.mileage.toLocaleString()} km
