@@ -210,7 +210,7 @@ export default function DealershipDashboard() {
     setError('')
     setMessage('')
 
-    if (!editingListing.price) {
+    if (!formData.price) {
       setError('Veuillez remplir tous les champs obligatoires')
       return
     }
@@ -223,9 +223,9 @@ export default function DealershipDashboard() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          price: parseInt(editingListing.price),
-          mileage: editingListing.mileage ? Number(editingListing.mileage) || null : null,
-          description: editingListing.description || null,
+          price: parseInt(formData.price),
+          mileage: formData.mileage ? Number(formData.mileage) || null : null,
+          description: formData.description || null,
           images: useSiteImages && siteImages.length > 0 ? siteImages : (imageUrls.length > 0 ? imageUrls : null),
         }),
       })
@@ -246,6 +246,7 @@ export default function DealershipDashboard() {
           })
         
         setEditingListing(null)
+        setShowAddForm(false)
         setFormData({
           vehicleId: '',
           price: '',
@@ -435,7 +436,7 @@ export default function DealershipDashboard() {
             </div>
 
             {showAddForm && (
-              <form onSubmit={handleAddListing} className="space-y-4">
+              <form onSubmit={editingListing ? handleUpdateListing : handleAddListing} className="space-y-4">
                 {/* Filtres de sélection */}
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -551,8 +552,17 @@ export default function DealershipDashboard() {
                 </div>
 
                 <button type="submit" className="btn-primary w-full">
-                  Ajouter l'annonce
+                  {editingListing ? 'Enregistrer les modifications' : 'Ajouter l\'annonce'}
                 </button>
+                {editingListing && (
+                  <button 
+                    type="button" 
+                    onClick={handleCancelEdit}
+                    className="btn-secondary w-full mt-2"
+                  >
+                    Annuler la modification
+                  </button>
+                )}
               </form>
             )}
           </div>
@@ -608,8 +618,9 @@ export default function DealershipDashboard() {
                         </button>
                         <button
                           onClick={() => {
-                            setEditingListing({
-                              id: listing.id,
+                            setEditingListing({ id: listing.id })
+                            setFormData({
+                              vehicleId: listing.vehicle.id,
                               price: listing.price.toString(),
                               mileage: listing.mileage?.toString() || '',
                               description: listing.description || '',
@@ -620,6 +631,7 @@ export default function DealershipDashboard() {
                             const siteImages = vehicle?.images ? JSON.parse(vehicle.images) : []
                             const listingImages = listing.images ? JSON.parse(listing.images) : []
                             setUseSiteImages(JSON.stringify(siteImages) === JSON.stringify(listingImages))
+                            setShowAddForm(true)
                           }}
                           className="text-yellow-400 hover:text-yellow-300 text-sm transition ml-2"
                         >
