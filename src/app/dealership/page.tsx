@@ -64,6 +64,12 @@ export default function DealershipDashboard() {
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [dealershipInfo, setDealershipInfo] = useState<DealershipInfo | null>(null)
   const [isEditingDealership, setIsEditingDealership] = useState(false)
+  const [invitations, setInvitations] = useState<any[]>([])
+  const [newInviteEmail, setNewInviteEmail] = useState('')
+  const [newInviteRole, setNewInviteRole] = useState('employee')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteMessage, setInviteMessage] = useState('')
+  const [inviteError, setInviteError] = useState('')
   const [dealershipEditForm, setDealershipEditForm] = useState({
     name: '',
     description: '',
@@ -121,6 +127,15 @@ export default function DealershipDashboard() {
         .then(data => {
           if (Array.isArray(data)) {
             setBrands(data)
+          }
+        })
+
+      // Récupérer les invitations
+      fetch('/api/dealerships/my-dealership/invitations')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setInvitations(data)
           }
         })
     }
@@ -325,6 +340,59 @@ export default function DealershipDashboard() {
       }
     } catch (err) {
       setError('Une erreur est survenue')
+    }
+  }
+
+  const handleSendInvitation = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setInviteError('')
+    setInviteMessage('')
+    setInviteLoading(true)
+
+    try {
+      const res = await fetch('/api/dealerships/my-dealership/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newInviteEmail,
+          role: newInviteRole,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setInviteMessage('Invitation envoyée avec succès!')
+        setNewInviteEmail('')
+        setInvitations([...invitations, data])
+      } else {
+        setInviteError(data.error || 'Erreur lors de l\'envoi de l\'invitation')
+      }
+    } catch (err) {
+      setInviteError('Une erreur est survenue')
+    } finally {
+      setInviteLoading(false)
+    }
+  }
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette invitation?')) return
+
+    try {
+      const res = await fetch(`/api/dealerships/my-dealership/invitations?id=${invitationId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setInviteMessage(data.message)
+        setInvitations(invitations.filter(inv => inv.id !== invitationId))
+      } else {
+        setInviteError(data.error || 'Erreur lors de l\'annulation de l\'invitation')
+      }
+    } catch (err) {
+      setInviteError('Une erreur est survenue')
     }
   }
 
@@ -642,6 +710,84 @@ export default function DealershipDashboard() {
                   </div>
                 )
               })}
+            </div>
+          )}
+        </div>
+
+        {/* Section d'invitations */}
+        <div className="mt-12">
+          <h2 className="font-display text-2xl font-bold text-white mb-6">
+            Inviter des membres
+          </h2>
+          
+          <div className="card p-6">
+            <form onSubmit={handleSendInvitation} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Email du membre *</label>
+                  <input
+                    type="email"
+                    value={newInviteEmail}
+                    onChange={(e) => setNewInviteEmail(e.target.value)}
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    placeholder="email@membre.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">Rôle *</label>
+                  <select
+                    value={newInviteRole}
+                    onChange={(e) => setNewInviteRole(e.target.value)}
+                    className="w-full bg-dark-300 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary-500 focus:outline-none"
+                    required
+                  >
+                    <option value="employee">Employé</option>
+                    <option value="manager">Manager</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button 
+                type="submit" 
+                className="btn-primary w-full"
+                disabled={inviteLoading}
+              >
+                {inviteLoading ? 'Envoi en cours...' : 'Envoyer l\'invitation'}
+              </button>
+            </form>
+            
+            {(inviteMessage || inviteError) && (
+              <div className={`mt-4 p-4 rounded-lg ${inviteMessage ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'}`}>
+                {inviteMessage || inviteError}
+              </div>
+            )}
+          </div>
+
+          {/* Liste des invitations en attente */}
+          {invitations.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-display text-xl font-bold text-white mb-4">
+                Invitations en attente ({invitations.length})
+              </h3>
+              
+              <div className="space-y-3">
+                {invitations.map(invitation => (
+                  <div key={invitation.id} className="card p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-white font-medium">{invitation.email}</p>
+                      <p className="text-gray-400 text-sm capitalize">Rôle: {invitation.role}</p>
+                      <p className="text-gray-500 text-xs">Envoyée: {new Date(invitation.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCancelInvitation(invitation.id)}
+                      className="text-red-400 hover:text-red-300 text-sm transition"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

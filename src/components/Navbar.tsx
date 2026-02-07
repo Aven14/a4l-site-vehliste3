@@ -40,6 +40,9 @@ export function Navbar() {
             <Link href="/dealerships" className="text-gray-300 hover:text-primary-400 transition font-medium hidden sm:block">
               Concessionnaires
             </Link>
+            <a href="https://discord.gg/KeXpbkCwvm" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition font-medium">
+              Discord
+            </a>
 
             {session ? (
               <div className="flex items-center gap-3">

@@ -53,7 +53,8 @@ model User {
   // Couleur du thème personnalisée
   themeColor        String?  // Code couleur hex (ex: #a855f7 pour violet)
   // Concessionnaire associé
-  dealership        Dealership?
+  dealershipMemberships UserDealership[]
+  sentInvitations DealershipInvitation[] @relation("InvitationSender")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -104,11 +105,42 @@ model Dealership {
   name        String   @unique
   description String?
   logo        String?
-  userId      String   @unique // Un utilisateur = un concessionnaire
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Propriétaire de la concession (stocké dans UserDealership avec rôle 'owner')
+  users       UserDealership[] // Relation plusieurs-à-plusieurs avec les utilisateurs
+  invitations DealershipInvitation[] // Invitations envoyées pour cette concession
   listings    DealershipListing[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Relation entre utilisateur et concession
+model UserDealership {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dealershipId   String
+  dealership     Dealership  @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  role           String      // "owner", "manager", "employee"
+  createdAt      DateTime    @default(now())
+  
+  @@unique([userId, dealershipId])
+  @@index([role]) // Index pour rechercher les propriétaires
+}
+
+// Invitations pour les concessionnaires
+model DealershipInvitation {
+  id             String      @id @default(cuid())
+  email          String      // Email de la personne invitée
+  dealershipId   String
+  dealership     Dealership  @relation(fields: [dealershipId], references: [id], onDelete: Cascade)
+  senderId       String      // Utilisateur qui a envoyé l'invitation
+  sender         User        @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+  role           String      // Rôle attribué à l'utilisateur après acceptation
+  token          String      @unique // Token pour valider l'invitation
+  expiresAt      DateTime    // Date d'expiration de l'invitation
+  acceptedAt     DateTime?
+  declinedAt     DateTime?
+  createdAt      DateTime    @default(now())
 }
 
 // Véhicules en vente par les concessionnaires
