@@ -11,8 +11,10 @@ export async function GET() {
               u.username, u.email, u.image,
               COUNT(dl.id) as listing_count
        FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
        LEFT JOIN "DealershipListing" dl ON d.id = dl."dealershipId"
+       WHERE ud.role = 'owner' OR ud.role IS NULL
        GROUP BY d.id, u.id
        ORDER BY d.name ASC`
     )

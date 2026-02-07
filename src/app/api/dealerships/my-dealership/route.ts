@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
       `SELECT d.id, d.name, d.description, d.logo,
               COUNT(dl.id) as listings_count
        FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
        LEFT JOIN "DealershipListing" dl ON d.id = dl."dealershipId"
-       WHERE u.email = $1
+       WHERE u.email = $1 AND ud.role = 'owner'
        GROUP BY d.id`,
       [session.user.email]
     )
@@ -63,24 +64,31 @@ export async function PUT(req: NextRequest) {
   try {
     const { name, description, logo } = await req.json()
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      include: { dealership: true },
-    })
+    const user = await query(
+      `SELECT u.id, d.id as dealership_id, d.name, d.description, d.logo
+       FROM "User" u
+       LEFT JOIN "UserDealership" ud ON u.id = ud."userId"
+       LEFT JOIN "Dealership" d ON ud."dealershipId" = d.id
+       WHERE u.email = $1 AND ud.role = 'owner'`,
+      [session.user.email]
+    )
 
-    if (!user?.dealership) {
+    if (user.rows.length === 0 || !user.rows[0].dealership_id) {
       return NextResponse.json(
         { error: 'Vous n\'avez pas de concessionnaire' },
         { status: 404 }
       )
     }
 
+    const userData = user.rows[0]
+
     // Vérifier que le nouveau nom n'existe pas
-    if (name && name !== user.dealership.name) {
-      const existing = await prisma.dealership.findUnique({
-        where: { name },
-      })
-      if (existing) {
+    if (name && name !== userData.name) {
+      const existing = await query(
+        `SELECT id FROM "Dealership" WHERE name = $1 AND id != $2`,
+        [name, userData.dealership_id]
+      )
+      if (existing.rows.length > 0) {
         return NextResponse.json(
           { error: 'Ce nom de concessionnaire est déjà pris' },
           { status: 400 }
@@ -88,23 +96,12 @@ export async function PUT(req: NextRequest) {
       }
     }
 
-    const updateData: any = {}
-    if (name !== undefined) {
-      updateData.name = name
-    }
-    if (description !== undefined) {
-      updateData.description = description
-    }
-    if (logo !== undefined) {
-      updateData.logo = logo
-    }
+    const updateResult = await query(
+      `UPDATE "Dealership" SET name = COALESCE($1, name), description = COALESCE($2, description), logo = COALESCE($3, logo) WHERE id = $4 RETURNING *`,
+      [name, description, logo, userData.dealership_id]
+    )
 
-    const updated = await prisma.dealership.update({
-      where: { id: user.dealership.id },
-      data: updateData,
-    })
-
-    return NextResponse.json(updated)
+    return NextResponse.json(updateResult.rows[0])
   } catch (error) {
     console.error('Erreur modification concessionnaire:', error)
     return NextResponse.json(

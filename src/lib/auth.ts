@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from './prisma'
+import { query } from './db' // Assuming we have a db query function
 import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
@@ -16,10 +17,21 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
-          include: { role: true },
-        })
+        // First, get the user with their role
+        const userResult = await query(
+          `SELECT u.id, u.username, u.email, u.password, u."isVerified", u."themeColor",
+                  r.name as "roleName", r."canAccessAdmin", r."canEditBrands", r."canEditVehicles", 
+                  r."canDeleteBrands", r."canDeleteVehicles", r."canImport", r."canManageUsers", 
+                  r."canManageRoles", r."canManageDealerships", r."canManageSite"
+           FROM "User" u
+           LEFT JOIN "Role" r ON u."roleId" = r.id
+           WHERE u.username = $1`,
+          [credentials.username]
+        )
+
+        if (userResult.rows.length === 0) return null
+
+        const user = userResult.rows[0]
 
         if (!user || !user.password) return null
 
@@ -27,29 +39,37 @@ export const authOptions: NextAuthOptions = {
         if (!isValid) return null
 
         // Vérifier que le compte est vérifié (sauf pour les comptes système)
-        if (!user.isVerified && user.role?.name !== 'superadmin' && user.role?.name !== 'admin') {
+        if (!user.isVerified && user.roleName !== 'superadmin' && user.roleName !== 'admin') {
           throw new Error('UNVERIFIED')
         }
 
-        const isSuperAdmin = user.role?.name === 'superadmin'
+        const isSuperAdmin = user.roleName === 'superadmin'
+
+        // Check if user owns a dealership
+        const dealershipResult = await query(
+          `SELECT COUNT(*) as count FROM "UserDealership" 
+           WHERE "userId" = $1 AND role = 'owner'`,
+          [user.id]
+        )
+        const hasDealership = parseInt(dealershipResult.rows[0].count) > 0
 
         return {
           id: user.id,
           name: user.username,
           email: user.email,
           themeColor: user.themeColor || undefined,
-          roleName: user.role?.name || 'user',
-          canAccessAdmin: isSuperAdmin || user.role?.canAccessAdmin || false,
-          canEditBrands: isSuperAdmin || user.role?.canEditBrands || false,
-          canEditVehicles: isSuperAdmin || user.role?.canEditVehicles || false,
-          canDeleteBrands: isSuperAdmin || user.role?.canDeleteBrands || false,
-          canDeleteVehicles: isSuperAdmin || user.role?.canDeleteVehicles || false,
-          canImport: isSuperAdmin || user.role?.canImport || false,
-          canManageUsers: isSuperAdmin || user.role?.canManageUsers || false,
-          canManageRoles: isSuperAdmin || user.role?.canManageRoles || false,
-          canManageDealerships: isSuperAdmin || user.role?.canManageDealerships || false,
-          canManageSite: isSuperAdmin || user.role?.canManageSite || false,
-          dealership: user.dealership ? true : false,
+          roleName: user.roleName || 'user',
+          canAccessAdmin: isSuperAdmin || user.canAccessAdmin || false,
+          canEditBrands: isSuperAdmin || user.canEditBrands || false,
+          canEditVehicles: isSuperAdmin || user.canEditVehicles || false,
+          canDeleteBrands: isSuperAdmin || user.canDeleteBrands || false,
+          canDeleteVehicles: isSuperAdmin || user.canDeleteVehicles || false,
+          canImport: isSuperAdmin || user.canImport || false,
+          canManageUsers: isSuperAdmin || user.canManageUsers || false,
+          canManageRoles: isSuperAdmin || user.canManageRoles || false,
+          canManageDealerships: isSuperAdmin || user.canManageDealerships || false,
+          canManageSite: isSuperAdmin || user.canManageSite || false,
+          dealership: hasDealership,
         }
       },
     }),
@@ -79,25 +99,43 @@ export const authOptions: NextAuthOptions = {
         token.dealership = user.dealership
       } else if (token.sub) {
         // Rafraîchir les données depuis la base de données quand l'utilisateur n'est pas défini
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          include: { role: true, dealership: true },
-        })
-        const isSuperAdmin = dbUser.role?.name === 'superadmin'
-        if (dbUser) {
+        const dbUserResult = await query(
+          `SELECT u.id, u."themeColor", r.name as "roleName",
+                  r."canAccessAdmin", r."canEditBrands", r."canEditVehicles", 
+                  r."canDeleteBrands", r."canDeleteVehicles", r."canImport", 
+                  r."canManageUsers", r."canManageRoles", r."canManageDealerships", 
+                  r."canManageSite"
+           FROM "User" u
+           LEFT JOIN "Role" r ON u."roleId" = r.id
+           WHERE u.id = $1`,
+          [token.sub]
+        )
+
+        if (dbUserResult.rows.length > 0) {
+          const dbUser = dbUserResult.rows[0]
+          const isSuperAdmin = dbUser.roleName === 'superadmin'
+          
+          // Check if user owns a dealership
+          const dealershipResult = await query(
+            `SELECT COUNT(*) as count FROM "UserDealership" 
+             WHERE "userId" = $1 AND role = 'owner'`,
+            [token.sub]
+          )
+          const hasDealership = parseInt(dealershipResult.rows[0].count) > 0
+
           token.themeColor = dbUser.themeColor || undefined
-          token.roleName = dbUser.role?.name || 'user'
-          token.canAccessAdmin = isSuperAdmin || dbUser.role?.canAccessAdmin || false
-          token.canEditBrands = isSuperAdmin || dbUser.role?.canEditBrands || false
-          token.canEditVehicles = isSuperAdmin || dbUser.role?.canEditVehicles || false
-          token.canDeleteBrands = isSuperAdmin || dbUser.role?.canDeleteBrands || false
-          token.canDeleteVehicles = isSuperAdmin || dbUser.role?.canDeleteVehicles || false
-          token.canImport = isSuperAdmin || dbUser.role?.canImport || false
-          token.canManageUsers = isSuperAdmin || dbUser.role?.canManageUsers || false
-          token.canManageRoles = isSuperAdmin || dbUser.role?.canManageRoles || false
-          token.canManageDealerships = isSuperAdmin || dbUser.role?.canManageDealerships || false
-          token.canManageSite = isSuperAdmin || dbUser.role?.canManageSite || false
-          token.dealership = dbUser.dealership ? true : false
+          token.roleName = dbUser.roleName || 'user'
+          token.canAccessAdmin = isSuperAdmin || dbUser.canAccessAdmin || false
+          token.canEditBrands = isSuperAdmin || dbUser.canEditBrands || false
+          token.canEditVehicles = isSuperAdmin || dbUser.canEditVehicles || false
+          token.canDeleteBrands = isSuperAdmin || dbUser.canDeleteBrands || false
+          token.canDeleteVehicles = isSuperAdmin || dbUser.canDeleteVehicles || false
+          token.canImport = isSuperAdmin || dbUser.canImport || false
+          token.canManageUsers = isSuperAdmin || dbUser.canManageUsers || false
+          token.canManageRoles = isSuperAdmin || dbUser.canManageRoles || false
+          token.canManageDealerships = isSuperAdmin || dbUser.canManageDealerships || false
+          token.canManageSite = isSuperAdmin || dbUser.canManageSite || false
+          token.dealership = hasDealership
         }
       }
       return token

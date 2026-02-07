@@ -23,8 +23,9 @@ export async function PUT(
     // Get user dealership
     const dealershipResult = await query(
       `SELECT d.id FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
-       WHERE u.email = $1`,
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
+       WHERE u.email = $1 AND ud.role = 'owner'`,
       [session.user.email]
     )
 
@@ -50,23 +51,74 @@ export async function PUT(
       )
     }
 
-    const updated = await prisma.dealershipListing.update({
-      where: { id: params.id },
-      data: {
-        price: price !== undefined ? price : undefined,
-        mileage: mileage !== undefined ? mileage : undefined,
-        description: description !== undefined ? description : undefined,
-        images: images ? JSON.stringify(images) : undefined,
-        isAvailable: isAvailable !== undefined ? isAvailable : undefined,
-      },
-      include: {
-        vehicle: {
-          include: { brand: true },
-        },
-      },
-    })
+    const updateData: any = [];
+    const updateValues = [];
+    let updateIndex = 2;
 
-    return NextResponse.json(updated)
+    if (price !== undefined) {
+      updateData.push(`price = $${updateIndex}`);
+      updateValues.push(price);
+      updateIndex++;
+    }
+    if (mileage !== undefined) {
+      updateData.push(`mileage = $${updateIndex}`);
+      updateValues.push(mileage);
+      updateIndex++;
+    }
+    if (description !== undefined) {
+      updateData.push(`description = $${updateIndex}`);
+      updateValues.push(description);
+      updateIndex++;
+    }
+    if (images !== undefined) {
+      updateData.push(`images = $${updateIndex}`);
+      updateValues.push(images ? JSON.stringify(images) : null);
+      updateIndex++;
+    }
+    if (isAvailable !== undefined) {
+      updateData.push(`"isAvailable" = $${updateIndex}`);
+      updateValues.push(isAvailable);
+      updateIndex++;
+    }
+
+    if (updateData.length === 0) {
+      // No updates to make, return current listing
+      const currentListingResult = await query(
+        `SELECT dl.id, dl.price, dl.mileage, dl.description, dl.images, dl."isAvailable",
+                v.id as vehicle_id, v.name, v.description as vehicle_description,
+                v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images as vehicle_images,
+                b.id as brand_id, b.name as brand_name, b.logo as brand_logo
+         FROM "DealershipListing" dl
+         JOIN "Vehicle" v ON dl."vehicleId" = v.id
+         JOIN "Brand" b ON v."brandId" = b.id
+         WHERE dl.id = $1`,
+        [params.id]
+      );
+      
+      return NextResponse.json(currentListingResult.rows[0]);
+    }
+
+    updateValues.unshift(params.id); // Add id as first parameter
+
+    const updateResult = await query(
+      `UPDATE "DealershipListing" SET ${updateData.join(', ')} WHERE id = $1 RETURNING *`,
+      updateValues
+    );
+
+    // Récupérer les détails complets de l'annonce mise à jour
+    const fullListingResult = await query(
+      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl.images, dl."isAvailable",
+              v.id as vehicle_id, v.name, v.description as vehicle_description,
+              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images as vehicle_images,
+              b.id as brand_id, b.name as brand_name, b.logo as brand_logo
+       FROM "DealershipListing" dl
+       JOIN "Vehicle" v ON dl."vehicleId" = v.id
+       JOIN "Brand" b ON v."brandId" = b.id
+       WHERE dl.id = $1`,
+      [params.id]
+    )
+
+    return NextResponse.json(fullListingResult.rows[0])
   } catch (error) {
     console.error('Erreur modification annonce:', error)
     return NextResponse.json(
@@ -90,8 +142,9 @@ export async function DELETE(
     // Get user dealership
     const dealershipResult = await query(
       `SELECT d.id FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
-       WHERE u.email = $1`,
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
+       WHERE u.email = $1 AND ud.role = 'owner'`,
       [session.user.email]
     )
 
@@ -117,9 +170,10 @@ export async function DELETE(
       )
     }
 
-    await prisma.dealershipListing.delete({
-      where: { id: params.id },
-    })
+    await query(
+      `DELETE FROM "DealershipListing" WHERE id = $1 AND "dealershipId" = $2`,
+      [params.id, dealershipId]
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

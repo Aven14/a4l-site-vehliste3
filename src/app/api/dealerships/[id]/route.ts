@@ -13,8 +13,9 @@ export async function GET(
       `SELECT d.id, d.name, d.description, d.logo,
               u.username, u.email, u.image
        FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
-       WHERE d.id = $1`,
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
+       WHERE d.id = $1 AND ud.role = 'owner'`,
       [params.id]
     )
 
@@ -80,8 +81,6 @@ export async function GET(
 
     response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600')
     return response
-
-    return NextResponse.json(dealership)
   } catch (error) {
     console.error('Erreur récupération concessionnaire:', error)
     return NextResponse.json(

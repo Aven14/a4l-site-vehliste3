@@ -17,8 +17,9 @@ export async function GET(req: NextRequest) {
     // Récupérer le concessionnaire
     const dealershipResult = await query(
       `SELECT d.id FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
-       WHERE u.email = $1`,
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
+       WHERE u.email = $1 AND ud.role = 'owner'`,
       [session.user.email]
     )
 
@@ -101,8 +102,9 @@ export async function POST(req: NextRequest) {
     // Get dealership ID
     const dealershipResult = await query(
       `SELECT d.id FROM "Dealership" d
-       LEFT JOIN "User" u ON d."userId" = u.id
-       WHERE u.email = $1`,
+       LEFT JOIN "UserDealership" ud ON d.id = ud."dealershipId"
+       LEFT JOIN "User" u ON ud."userId" = u.id
+       WHERE u.email = $1 AND ud.role = 'owner'`,
       [session.user.email]
     )
 
@@ -137,23 +139,34 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const listing = await prisma.dealershipListing.create({
-      data: {
+    const listingResult = await query(
+      `INSERT INTO "DealershipListing" ("dealershipId", "vehicleId", price, mileage, description, images, "isAvailable", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
+       RETURNING *`,
+      [
         dealershipId,
         vehicleId,
         price,
-        mileage,
-        description,
-        images: images ? JSON.stringify(images) : null,
-      },
-      include: {
-        vehicle: {
-          include: { brand: true },
-        },
-      },
-    })
+        mileage || null,
+        description || null,
+        images ? JSON.stringify(images) : null
+      ]
+    )
 
-    return NextResponse.json(listing, { status: 201 })
+    // Récupérer les détails complets de l'annonce créée
+    const fullListingResult = await query(
+      `SELECT dl.id, dl.price, dl.mileage, dl.description, dl.images, dl."isAvailable",
+              v.id as vehicle_id, v.name, v.description as vehicle_description,
+              v.price as vehicle_price, v.power, v.trunk, v.vmax, v.seats, v.images as vehicle_images,
+              b.id as brand_id, b.name as brand_name, b.logo as brand_logo
+       FROM "DealershipListing" dl
+       JOIN "Vehicle" v ON dl."vehicleId" = v.id
+       JOIN "Brand" b ON v."brandId" = b.id
+       WHERE dl.id = $1`,
+      [listingResult.rows[0].id]
+    )
+
+    return NextResponse.json(fullListingResult.rows[0], { status: 201 })
   } catch (error) {
     console.error('Erreur création annonce:', error)
     return NextResponse.json(
