@@ -46,12 +46,19 @@ export const authOptions: NextAuthOptions = {
         const isSuperAdmin = user.roleName === 'superadmin'
 
         // Check if user owns a dealership
-        const dealershipResult = await query(
-          `SELECT COUNT(*) as count FROM "UserDealership" 
-           WHERE "userId" = $1 AND role = 'owner'`,
-          [user.id]
-        )
-        const hasDealership = parseInt(dealershipResult.rows[0].count) > 0
+        let hasDealership = false
+        try {
+          const dealershipResult = await query(
+            `SELECT COUNT(*) as count FROM "UserDealership" 
+             WHERE "userId" = $1 AND role = 'owner'`,
+            [user.id]
+          )
+          hasDealership = parseInt(dealershipResult.rows[0]?.count || '0') > 0
+        } catch (error) {
+          // Si la table n'existe pas encore, on suppose que l'utilisateur n'a pas de concession
+          console.warn('Table UserDealership does not exist yet:', error)
+          hasDealership = false
+        }
 
         return {
           id: user.id,
@@ -116,12 +123,19 @@ export const authOptions: NextAuthOptions = {
           const isSuperAdmin = dbUser.roleName === 'superadmin'
           
           // Check if user owns a dealership
-          const dealershipResult = await query(
-            `SELECT COUNT(*) as count FROM "UserDealership" 
-             WHERE "userId" = $1 AND role = 'owner'`,
-            [token.sub]
-          )
-          const hasDealership = parseInt(dealershipResult.rows[0].count) > 0
+          let hasDealership = false
+          try {
+            const dealershipResult = await query(
+              `SELECT COUNT(*) as count FROM "UserDealership" 
+               WHERE "userId" = $1 AND role = 'owner'`,
+              [token.sub]
+            )
+            hasDealership = parseInt(dealershipResult.rows[0]?.count || '0') > 0
+          } catch (error) {
+            // Si la table n'existe pas encore, on suppose que l'utilisateur n'a pas de concession
+            console.warn('Table UserDealership does not exist yet:', error)
+            hasDealership = false
+          }
 
           token.themeColor = dbUser.themeColor || undefined
           token.roleName = dbUser.roleName || 'user'
